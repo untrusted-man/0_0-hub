@@ -1,5 +1,5 @@
 --[[
-    0_0 Hub V2.2 - Ultimate Edition (Updated September 18, 2025)
+    0_0 Hub V2.2 - Ultimate Edition (Updated September 21, 2025)
     Enhanced with modern UI, multiple languages, advanced themes, and premium features
     - Glassmorphism design with particle effects
     - 8 languages supported
@@ -10,10 +10,11 @@
     - Auto-updater functionality
     - Advanced ESP with customization
     - Script favorites and history
+   
     - Premium animations and transitions
     - Compatible with all major executors
-    - Fixed: Day/Night cycle, Anime Visuals (reduced blur), God Mode (with health regen)
-    - Added: Jump Boost, Teleport to Player, Simple Aimbot (premium), Fullbright, Remove Fog
+    - Fixed: Day/Night cycle, Anime Visuals (non-blurry UI), God Mode (with health regen), Advanced ESP
+    - Added: Jump Boost, Teleport to Player, Simple Aimbot (with 'Q' toggle), Fullbright, Remove Fog, working hotkeys
 ]]
 
 --// Core Services with Executor Compatibility
@@ -39,6 +40,9 @@ end
 
 local mouse = player:GetMouse()
 
+--// Global state for UI toggling
+local hubGui, toggleHub
+
 --// Executor Detection and Compatibility
 local function detectExecutor()
     if syn and syn.protect_gui then
@@ -51,6 +55,7 @@ local function detectExecutor()
         return getexecutorname()
     elseif identifyexecutor then
         return identifyexecutor()
+ 
     elseif is_sirhurt_closure then
         return "SirHurt"
     elseif pebc_execute then
@@ -85,6 +90,7 @@ local HubState = {
     Performance = {
         FPS = 60,
         Ping = 0,
+       
         Memory = 0
     },
     ESPEnabled = false
@@ -99,6 +105,7 @@ local Languages = {
         visuals_tab = "Visuals",
         settings_tab = "Settings",
         info_tab = "Info",
+      
         premium_tab = "Premium",
         close_tooltip = "Close Hub",
         minimize_tooltip = "Minimize Hub",
@@ -108,6 +115,7 @@ local Languages = {
         fps_label = "FPS",
         ping_label = "Ping",
         memory_label = "Memory",
+      
         scripts_search = "Search scripts...",
         script_categories = "Categories",
         category_all = "All Scripts",
@@ -116,7 +124,8 @@ local Languages = {
         category_combat = "Combat",
         category_utility = "Utility",
         category_fun = "Fun & Games",
-        anime_visuals = "🌸 Anime Visuals Pro",
+        anime_visuals = "🌸 Anime Visuals UI",
+        
         day_night_cycle = "☀️ Dynamic Day/Night",
         infinite_yield = "⚡ Infinite Yield",
         esp_advanced = "👁️ Advanced ESP",
@@ -134,6 +143,7 @@ local Languages = {
         rainbow_character = "🌈 Rainbow Character",
         dance_animations = "💃 Dance Pack",
         music_player = "🎵 Music Player",
+    
         chat_effects = "💬 Chat Effects",
         particle_effects = "✨ Particle Effects",
         fullbright = "💡 Fullbright",
@@ -143,6 +153,7 @@ local Languages = {
         language_label = "Language",
         animations_label = "Animations",
         sounds_label = "Sound Effects",
+  
         particles_label = "Particle Effects",
         transparency_label = "Transparency",
         blur_strength = "Blur Strength",
@@ -152,6 +163,7 @@ local Languages = {
         emergency_hide = "Emergency Hide",
         quick_execute = "Quick Execute",
         favorites_title = "Favorite Scripts",
+    
         history_title = "Script History",
         notifications_title = "Notifications",
         update_available = "Update Available!",
@@ -161,9 +173,10 @@ local Languages = {
         username_placeholder = "Enter username",
         password_placeholder = "Enter password",
         login_button = "Access Hub",
+   
         login_success = "Access granted! Welcome to the hub.",
         login_failed = "Invalid credentials. Please try again.",
-        version_info = "Hub Version: 2.2 Ultimate (Updated 2025)\nLast Updated: September 18, 2025\nScripts Available: 35+\nPremium Features: Unlocked"
+        version_info = "Hub Version: 2.2 Ultimate (Updated 2025)\nLast Updated: September 21, 2025\nScripts Available: 35+\nAll Features: Unlocked"
     },
     es = {
         hub_title = "Centro 0_0 Ultimate",
@@ -172,19 +185,21 @@ local Languages = {
         visuals_tab = "Visuales",
         settings_tab = "Ajustes",
         info_tab = "Información",
+   
         premium_tab = "Premium",
         dashboard_welcome = "Bienvenido de nuevo, ",
         dashboard_subtitle = "Experiencia de juego premium al alcance de tus manos",
         performance_title = "Rendimiento del Sistema",
         scripts_search = "Buscar scripts...",
-        anime_visuals = "🌸 Visuales Anime Pro",
+        anime_visuals = "🌸 Visuales Anime UI",
         theme_label = "Tema Visual",
         language_label = "Idioma",
+     
         login_title = "🔐 Inicio Seguro",
         username_placeholder = "Ingresa usuario",
         password_placeholder = "Ingresa contraseña",
         login_button = "Acceder al Hub",
-        version_info = "Versión del Hub: 2.2 Ultimate (Actualizado 2025)\nÚltima Actualización: 18 de septiembre de 2025\nScripts Disponibles: 35+\nCaracterísticas Premium: Desbloqueadas",
+        version_info = "Versión del Hub: 2.2 Ultimate (Actualizado 2025)\nÚltima Actualización: 21 de septiembre de 2025\nScripts Disponibles: 35+\nCaracterísticas Premium: Desbloqueadas",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Remover Niebla",
         teleport_to_player = "📍 Teleportar a Jugador"
@@ -198,13 +213,14 @@ local Languages = {
         info_tab = "Informations",
         premium_tab = "Premium",
         dashboard_welcome = "Bon retour, ",
+ 
         dashboard_subtitle = "Expérience de jeu premium à portée de main",
-        anime_visuals = "🌸 Visuels Anime Pro",
+        anime_visuals = "🌸 Visuels Anime UI",
         login_title = "🔐 Connexion Sécurisée",
         username_placeholder = "Nom d'utilisateur",
         password_placeholder = "Mot de passe",
         login_button = "Accéder au Hub",
-        version_info = "Version du Hub : 2.2 Ultimate (Mis à jour 2025)\nDernière Mise à jour : 18 septembre 2025\nScripts Disponibles : 35+\nFonctionnalités Premium : Débloquées",
+        version_info = "Version du Hub : 2.2 Ultimate (Mis à jour 2025)\nDernière Mise à jour : 21 septembre 2025\nScripts Disponibles : 35+\nFonctionnalités Premium : Débloquées",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Supprimer le Brouillard",
         teleport_to_player = "📍 Téléporter vers le Joueur"
@@ -214,16 +230,18 @@ local Languages = {
         dashboard_tab = "Dashboard",
         scripts_tab = "Skripte",
         visuals_tab = "Visuals",
+  
         settings_tab = "Einstellungen",
         info_tab = "Info",
         premium_tab = "Premium",
         dashboard_welcome = "Willkommen zurück, ",
-        anime_visuals = "🌸 Anime Visuals Pro",
+        anime_visuals = "🌸 Anime Visuals UI",
         login_title = "🔐 Sichere Anmeldung",
         username_placeholder = "Benutzername eingeben",
         password_placeholder = "Passwort eingeben",
         login_button = "Hub öffnen",
-        version_info = "Hub-Version: 2.2 Ultimate (Aktualisiert 2025)\nLetztes Update: 18. September 2025\nVerfügbare Skripte: 35+\nPremium-Funktionen: Freigeschaltet",
+  
+        version_info = "Hub-Version: 2.2 Ultimate (Aktualisiert 2025)\nLetztes Update: 21. September 2025\nVerfügbare Skripte: 35+\nPremium-Funktionen: Freigeschaltet",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Nebel Entfernen",
         teleport_to_player = "📍 Zu Spieler Teleportieren"
@@ -232,23 +250,26 @@ local Languages = {
         hub_title = "Centro 0_0 Ultimate",
         dashboard_tab = "Painel",
         scripts_tab = "Scripts",
+   
         visuals_tab = "Visuais",
         settings_tab = "Configurações",
         info_tab = "Informações",
         premium_tab = "Premium",
         dashboard_welcome = "Bem-vindo de volta, ",
-        anime_visuals = "🌸 Visuais Anime Pro",
+        anime_visuals = "🌸 Visuais Anime UI",
         login_title = "🔐 Login Seguro",
         username_placeholder = "Digite o usuário",
         password_placeholder = "Digite a senha",
+ 
         login_button = "Acessar Hub",
-        version_info = "Versão do Hub: 2.2 Ultimate (Atualizado 2025)\nÚltima Atualização: 18 de setembro de 2025\nScripts Disponíveis: 35+\nRecursos Premium: Desbloqueados",
+        version_info = "Versão do Hub: 2.2 Ultimate (Atualizado 2025)\nÚltima Atualização: 21 de setembro de 2025\nScripts Disponíveis: 35+\nRecursos Premium: Desbloqueados",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Remover Névoa",
         teleport_to_player = "📍 Teleportar para Jogador"
     },
     ru = {
         hub_title = "Центр 0_0 Ultimate",
+      
         dashboard_tab = "Панель",
         scripts_tab = "Скрипты",
         visuals_tab = "Визуалы",
@@ -256,17 +277,18 @@ local Languages = {
         info_tab = "Информация",
         premium_tab = "Премиум",
         dashboard_welcome = "С возвращением, ",
-        anime_visuals = "🌸 Аниме Визуалы Про",
+        anime_visuals = "🌸 Аниме Визуалы UI",
         login_title = "🔐 Безопасный Вход",
         username_placeholder = "Введите имя пользователя",
         password_placeholder = "Введите пароль",
         login_button = "Войти в Hub",
-        version_info = "Версия Хаба: 2.2 Ultimate (Обновлено 2025)\nПоследнее Обновление: 18 сентября 2025\nДоступные Скрипты: 35+\nПремиум Функции: Разблокированы",
+        version_info = "Версия Хаба: 2.2 Ultimate (Обновлено 2025)\nПоследнее Обновление: 21 сентября 2025\nДоступные Скрипты: 35+\nПремиум Функции: Разблокированы",
         fullbright = "💡 Полная Яркость",
         remove_fog = "🌫️ Удалить Туман",
         teleport_to_player = "📍 Телепорт к Игроку"
     },
     ja = {
+    
         hub_title = "0_0 ハブ Ultimate",
         dashboard_tab = "ダッシュボード",
         scripts_tab = "スクリプト",
@@ -275,12 +297,12 @@ local Languages = {
         info_tab = "情報",
         premium_tab = "プレミアム",
         dashboard_welcome = "おかえりなさい、",
-        anime_visuals = "🌸 アニメビジュアル Pro",
+        anime_visuals = "🌸 アニメビジュアル UI",
         login_title = "🔐 セキュアログイン",
         username_placeholder = "ユーザー名を入力",
         password_placeholder = "パスワードを入力",
         login_button = "ハブにアクセス",
-        version_info = "ハブバージョン: 2.2 Ultimate (2025更新)\n最終更新: 2025年9月18日\n利用可能スクリプト: 35+\nプレミアム機能: アンロック",
+        version_info = "ハブバージョン: 2.2 Ultimate (2025更新)\n最終更新: 2025年9月21日\n利用可能スクリプト: 35+\nプレミアム機能: アンロック",
         fullbright = "💡 フルブライト",
         remove_fog = "🌫️ 霧を除去",
         teleport_to_player = "📍 プレイヤーへテレポート"
@@ -294,12 +316,12 @@ local Languages = {
         info_tab = "정보",
         premium_tab = "프리미엄",
         dashboard_welcome = "다시 오신 것을 환영합니다, ",
-        anime_visuals = "🌸 아니메 비주얼 Pro",
+        anime_visuals = "🌸 아니메 비주얼 UI",
         login_title = "🔐 보안 로그인",
         username_placeholder = "사용자명 입력",
         password_placeholder = "비밀번호 입력",
         login_button = "허브 접속",
-        version_info = "허브 버전: 2.2 Ultimate (2025 업데이트)\n마지막 업데이트: 2025년 9월 18일\n사용 가능 스크립트: 35+\n프리미엄 기능: 잠금 해제",
+        version_info = "허브 버전: 2.2 Ultimate (2025 업데이트)\n마지막 업데이트: 2025년 9월 21일\n사용 가능 스크립트: 35+\n프리미엄 기능: 잠금 해제",
         fullbright = "💡 풀브라이트",
         remove_fog = "🌫️ 안개 제거",
         teleport_to_player = "📍 플레이어로 텔레포트"
@@ -346,6 +368,7 @@ local Themes = {
         Primary = Color3.fromRGB(60, 35, 70),
         PrimaryTransparency = 0.2,
         Accent = Color3.fromRGB(255, 120, 80),
+  
         AccentGlow = Color3.fromRGB(255, 160, 120),
         Text = Color3.fromRGB(255, 240, 220),
         TextSecondary = Color3.fromRGB(255, 200, 180),
@@ -356,6 +379,7 @@ local Themes = {
     Ocean = {
         Background = Color3.fromRGB(10, 20, 40),
         BackgroundTransparency = 0.2,
+    
         Secondary = Color3.fromRGB(20, 35, 60),
         SecondaryTransparency = 0.3,
         Primary = Color3.fromRGB(30, 50, 80),
@@ -365,6 +389,7 @@ local Themes = {
         Text = Color3.fromRGB(220, 240, 255),
         TextSecondary = Color3.fromRGB(180, 220, 255),
         Blur = true,
+  
         Particles = true,
         Glow = false
     },
@@ -375,6 +400,7 @@ local Themes = {
         SecondaryTransparency = 0.3,
         Primary = Color3.fromRGB(35, 60, 35),
         PrimaryTransparency = 0.2,
+      
         Accent = Color3.fromRGB(100, 200, 100),
         AccentGlow = Color3.fromRGB(120, 255, 120),
         Text = Color3.fromRGB(220, 255, 220),
@@ -385,6 +411,7 @@ local Themes = {
     },
     Pastel = {
         Background = Color3.fromRGB(255, 240, 250),
+      
         BackgroundTransparency = 0.1,
         Secondary = Color3.fromRGB(255, 220, 240),
         SecondaryTransparency = 0.2,
@@ -394,6 +421,7 @@ local Themes = {
         AccentGlow = Color3.fromRGB(255, 150, 200),
         Text = Color3.fromRGB(80, 40, 60),
         TextSecondary = Color3.fromRGB(120, 80, 100),
+    
         Blur = false,
         Particles = true,
         Glow = false
@@ -404,6 +432,7 @@ local Themes = {
         Secondary = Color3.fromRGB(40, 40, 40),
         SecondaryTransparency = 0.2,
         Primary = Color3.fromRGB(60, 60, 60),
+        
         PrimaryTransparency = 0.1,
         Accent = Color3.fromRGB(255, 255, 255),
         AccentGlow = Color3.fromRGB(200, 200, 200),
@@ -423,6 +452,7 @@ local Themes = {
         Accent = Color3.fromRGB(150, 50, 255),
         AccentGlow = Color3.fromRGB(200, 100, 255),
         Text = Color3.fromRGB(240, 220, 255),
+        
         TextSecondary = Color3.fromRGB(200, 180, 255),
         Blur = true,
         Particles = true,
@@ -444,6 +474,7 @@ local Themes = {
         Glow = true
     },
     Ice = {
+  
         Background = Color3.fromRGB(200, 230, 255),
         BackgroundTransparency = 0.3,
         Secondary = Color3.fromRGB(220, 240, 255),
@@ -463,6 +494,7 @@ local Themes = {
         BackgroundTransparency = 0.1,
         Secondary = Color3.fromRGB(60, 30, 90),
         SecondaryTransparency = 0.2,
+    
         Primary = Color3.fromRGB(80, 40, 120),
         PrimaryTransparency = 0.1,
         Accent = Color3.fromRGB(255, 0, 150),
@@ -472,6 +504,7 @@ local Themes = {
         Blur = false,
         Particles = true,
         Glow = true
+    
     },
     Matrix = {
         Background = Color3.fromRGB(0, 0, 0),
@@ -482,6 +515,7 @@ local Themes = {
         PrimaryTransparency = 0.1,
         Accent = Color3.fromRGB(0, 255, 0),
         AccentGlow = Color3.fromRGB(50, 255, 50),
+    
         Text = Color3.fromRGB(0, 255, 0),
         TextSecondary = Color3.fromRGB(0, 200, 0),
         Blur = false,
@@ -495,39 +529,244 @@ local ScriptLibrary = {
     {
         name = "anime_visuals",
         category = "visuals",
-        premium = true,
-        description = "Premium anime visual effects with custom shaders (non-blurry)",
+        premium = false,
+  
+        description = "Anime-style visuals with a UI for customization",
         func = function()
-            -- Fixed Anime Visuals - Reduced blur effects
+            -- AnimeVisuals_UI_Toggle.lua
+            -- Anime-style visuals with polished UI, working sliders, close/open, and RightCtrl toggle
+            local Players = game:GetService("Players")
+            local Lighting = game:GetService("Lighting")
+            local TweenService = game:GetService("TweenService")
+            local UserInputService = game:GetService("UserInputService")
+            local player = Players.LocalPlayer
+            local playerGui = player:WaitForChild("PlayerGui")
+            local camera = workspace.CurrentCamera
+            
+            if playerGui:FindFirstChild("AnimeVisualsGUI") then
+                playerGui.AnimeVisualsGUI:Destroy()
+            end
+            
+            -- === Effect creation helper ===
             local function createEffect(class, name, props)
                 local e = Lighting:FindFirstChild(name) or Instance.new(class)
                 e.Name = name
                 e.Parent = Lighting
-                for k,v in pairs(props) do
+                for k, v in pairs(props) do
                     pcall(function() e[k] = v end)
                 end
                 return e
             end
-            
-            -- ColorCorrection for tint
-            createEffect("ColorCorrectionEffect", "AnimeCC", {
-                Enabled = true, Brightness = 0.1, Contrast = 0.3, Saturation = 0.4,
-                TintColor = Color3.fromRGB(255, 230, 245)
+            -- === Effects ===
+            local cc = createEffect("ColorCorrectionEffect", "Anime_CC", {
+                Enabled = true,
+                Brightness = 0,
+                Contrast = 0.2,
+                Saturation = 0.3,
+                TintColor = Color3.fromRGB(255, 230, 240)
             })
-            -- Reduced Bloom for less blur
-            createEffect("BloomEffect", "AnimeBloom", {
-                Enabled = true, Intensity = 0.8, Threshold = 1.0, Size = 24
+            local bloom = createEffect("BloomEffect", "Anime_Bloom", {
+                Enabled = true,
+                Intensity = 1.2,
+                Threshold = 0.6,
+                Size = 56
             })
-            -- SunRays
-            createEffect("SunRaysEffect", "AnimeSun", {
-                Enabled = true, Intensity = 0.15, Spread = 0.8
+            local sun = createEffect("SunRaysEffect", "Anime_Sun", {
+                Enabled = true,
+                Intensity = 0.1
             })
-            -- Reduced DoF for minimal blur
-            createEffect("DepthOfFieldEffect", "AnimeDoF", {
-                Enabled = true, FocusDistance = 50, InFocusRadius = 30, FarIntensity = 0.2
+            local dof = createEffect("DepthOfFieldEffect", "Anime_DoF", {
+                Enabled = false,
+                FocusDistance = 60,
+                InFocusRadius = 12,
+                FarIntensity = 0.7
             })
-            
-            showNotification("Anime Visuals Pro activated (non-blurry)!", "success")
+            -- === Tween helper ===
+            local function tween(obj, props, t)
+                TweenService:Create(obj, TweenInfo.new(t or 0.3, Enum.EasingStyle.Sine), props):Play()
+            end
+            -- === UI Root ===
+            local gui = Instance.new("ScreenGui")
+            gui.Name = "AnimeVisualsGUI"
+            gui.ResetOnSpawn = false
+            gui.Parent = playerGui
+            local main = Instance.new("Frame")
+            main.Size = UDim2.new(0, 420, 0, 360)
+            main.Position = UDim2.new(0.5, -210, 0.85, -180)
+            main.AnchorPoint = Vector2.new(0.5, 0.5)
+            main.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+            main.BackgroundTransparency = 0.15
+            main.BorderSizePixel = 0
+            main.Parent = gui
+            main.Active = true
+            main.Draggable = true
+            Instance.new("UICorner", main).CornerRadius = UDim.new(0, 18)
+            -- Title
+            local title = Instance.new("TextLabel")
+            title.Size = UDim2.new(1, -40, 0, 40)
+            title.Position = UDim2.new(0, 20, 0, 0)
+            title.BackgroundTransparency = 1
+            title.Text = "🌸 Anime Visuals 🌸"
+            title.Font = Enum.Font.GothamBold
+            title.TextSize = 20
+            title.TextColor3 = Color3.fromRGB(250, 240, 255)
+            title.TextXAlignment = Enum.TextXAlignment.Left
+            title.Parent = main
+            -- Close Button
+            local closeBtn = Instance.new("TextButton")
+            closeBtn.Size = UDim2.new(0, 32, 0, 32)
+            closeBtn.Position = UDim2.new(1, -40, 0, 8)
+            closeBtn.BackgroundColor3 = Color3.fromRGB(80, 40, 40)
+            closeBtn.Text = "X"
+            closeBtn.TextColor3 = Color3.fromRGB(255, 220, 220)
+            closeBtn.Font = Enum.Font.GothamBold
+            closeBtn.TextSize = 16
+            closeBtn.Parent = main
+            Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
+            -- Toggle button
+            local toggle = Instance.new("TextButton")
+            toggle.Size = UDim2.new(0, 120, 0, 28)
+            toggle.Position = UDim2.new(0.5, -60, 1, -40)
+            toggle.AnchorPoint = Vector2.new(0.5, 0)
+            toggle.BackgroundColor3 = Color3.fromRGB(60, 50, 120)
+            toggle.Text = "Disable"
+            toggle.TextColor3 = Color3.fromRGB(240, 240, 255)
+            toggle.Font = Enum.Font.Gotham
+            toggle.TextSize = 14
+            toggle.Parent = main
+            Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 8)
+            -- Content container
+            local content = Instance.new("Frame")
+            content.Size = UDim2.new(1, -20, 1, -110)
+            content.Position = UDim2.new(0, 10, 0, 50)
+            content.BackgroundTransparency = 1
+            content.Parent = main
+            -- === Presets ===
+            local presets = Instance.new("Frame")
+            presets.Size = UDim2.new(1, 0, 0, 36)
+            presets.BackgroundTransparency = 1
+            presets.Parent = content
+            local function makePreset(x, text, color)
+                local b = Instance.new("TextButton")
+                b.Size = UDim2.new(0.3, 0, 1, 0)
+                b.Position = UDim2.new(x, 0, 0, 0)
+                b.BackgroundColor3 = color
+                b.Text = text
+                b.TextColor3 = Color3.fromRGB(255, 255, 255)
+                b.Font = Enum.Font.GothamBold
+                b.TextSize = 14
+                b.Parent = presets
+                Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
+                return b
+            end
+            local p1 = makePreset(0.0, "Pastel", Color3.fromRGB(150, 100, 200))
+            local p2 = makePreset(0.35, "Contrast", Color3.fromRGB(100, 180, 240))
+            local p3 = makePreset(0.7, "Sunset", Color3.fromRGB(255, 120, 120))
+            -- === Slider Factory ===
+            local y = 50
+            local draggingSlider = nil
+            local function createSlider(labelText, min, max, default, callback)
+                local container = Instance.new("Frame")
+                container.Size = UDim2.new(1, 0, 0, 46)
+                container.Position = UDim2.new(0, 0, 0, y)
+                container.BackgroundTransparency = 1
+                container.Parent = content
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(0.4, 0, 1, -14)
+                label.Position = UDim2.new(0, 0, 0, 0)
+                label.BackgroundTransparency = 1
+                label.Text = labelText
+                label.TextColor3 = Color3.fromRGB(230, 230, 255)
+                label.Font = Enum.Font.Gotham
+                label.TextSize = 14
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.Parent = container
+                local bar = Instance.new("Frame")
+                bar.Size = UDim2.new(0.55, 0, 0, 6)
+                bar.Position = UDim2.new(0.42, 0, 0.6, 0)
+                bar.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+                bar.BorderSizePixel = 0
+                bar.Parent = container
+                Instance.new("UICorner", bar).CornerRadius = UDim.new(0, 4)
+                local fill = Instance.new("Frame")
+                fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+                fill.BackgroundColor3 = Color3.fromRGB(180, 120, 230)
+                fill.BorderSizePixel = 0
+                fill.Parent = bar
+                Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 4)
+                local knob = Instance.new("Frame")
+                knob.Size = UDim2.new(0, 12, 0, 12)
+                knob.Position = UDim2.new(fill.Size.X.Scale, -6, 0.5, -6)
+                knob.BackgroundColor3 = Color3.fromRGB(250, 250, 255)
+                knob.BorderSizePixel = 0
+                knob.Parent = bar
+                Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
+                local function updateFromX(x)
+                    local rel = math.clamp((x - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
+                    fill.Size = UDim2.new(rel, 0, 1, 0)
+                    knob.Position = UDim2.new(rel, -6, 0.5, -6)
+                    local v = min + (max - min) * rel
+                    callback(v)
+                end
+                knob.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSlider = { update = updateFromX } end end)
+                bar.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then updateFromX(input.Position.X) draggingSlider = { update = updateFromX } end end)
+                y = y + 50
+                callback(default)
+            end
+            UserInputService.InputChanged:Connect(function(input) if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then draggingSlider.update(input.Position.X) end end)
+            UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSlider = nil end end)
+            -- === Sliders ===
+            createSlider("Saturation", -1, 2, 0.3, function(v) cc.Saturation = v end)
+            createSlider("Contrast", -1, 2, 0.2, function(v) cc.Contrast = v end)
+            createSlider("Bloom", 0, 3, 1.2, function(v) bloom.Intensity = v end)
+            createSlider("FOV", 50, 100, 70, function(v) camera.FieldOfView = v end)
+            -- === Preset logic ===
+            local function applyPreset(id)
+                if id == 1 then cc.Saturation = 0.6; cc.Contrast = 0.15; bloom.Intensity = 1; camera.FieldOfView = 75 elseif id == 2 then cc.Saturation = -0.1; cc.Contrast = 0.6; bloom.Intensity = 1.6; camera.FieldOfView = 68 elseif id == 3 then cc.Saturation = 0.3; cc.Contrast = 0.2; bloom.Intensity = 1.4; camera.FieldOfView = 72 end
+            end
+            p1.MouseButton1Click:Connect(function() applyPreset(1) end)
+            p2.MouseButton1Click:Connect(function() applyPreset(2) end)
+            p3.MouseButton1Click:Connect(function() applyPreset(3) end)
+            -- === Toggle visuals ===
+            local enabled = true
+            toggle.MouseButton1Click:Connect(function()
+                enabled = not enabled
+                toggle.Text = enabled and "Disable" or "Enable"
+                cc.Enabled = enabled
+                bloom.Enabled = enabled
+                sun.Enabled = enabled
+                dof.Enabled = enabled
+            end)
+            -- === Show/Hide UI with animation ===
+            local isVisible = true
+            local function toggleUI()
+                if isVisible then
+                    tween(main, { BackgroundTransparency = 1 }, 0.3)
+                    tween(main, { Position = UDim2.new(0.5, -210, 1.2, 0) }, 0.3)
+                    task.wait(0.3)
+                    main.Visible = false
+                else
+                    main.Visible = true
+                    main.BackgroundTransparency = 1
+                    main.Position = UDim2.new(0.5, -210, 1.2, 0)
+                    tween(main, { BackgroundTransparency = 0.15 }, 0.3)
+                    tween(main, { Position = UDim2.new(0.5, -210, 0.85, -180) }, 0.4)
+                end
+                isVisible = not isVisible
+            end
+            closeBtn.MouseButton1Click:Connect(function()
+                gui:Destroy()
+                -- Reset effects on close
+                pcall(function()
+                    Lighting.Anime_CC:Destroy()
+                    Lighting.Anime_Bloom:Destroy()
+                    Lighting.Anime_Sun:Destroy()
+                    Lighting.Anime_DoF:Destroy()
+                end)
+            end)
+            -- Startup animation
+            main.Position = UDim2.new(0.5, -210, 1.2, 0)
+            tween(main, { Position = UDim2.new(0.5, -210, 0.85, -180) }, 0.6)
         end
     },
     {
@@ -535,42 +774,28 @@ local ScriptLibrary = {
         category = "visuals",
         premium = false,
         description = "Dynamic day/night cycle with smooth transitions",
+ 
         func = function()
-            -- Fixed Day/Night Cycle - Use ClockTime, direct spawn, smoother tween
-            spawn(function()
-                local tweenInfo = TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-                while wait(60) do  -- Update every minute for smoother changes
-                    local clockTime = Lighting.ClockTime
-                    if clockTime >= 6 and clockTime < 18 then
-                        -- Day settings
-                        local dayProps = {
-                            Ambient = Color3.fromRGB(70, 70, 70),
-                            Brightness = 3,
-                            ColorShift_Bottom = Color3.fromRGB(0, 0, 0),
-                            ColorShift_Top = Color3.fromRGB(0, 0, 0),
-                            OutdoorAmbient = Color3.fromRGB(70, 70, 70)
-                        }
-                        TweenService:Create(Lighting, tweenInfo, dayProps):Play()
-                    else
-                        -- Night settings
-                        local nightProps = {
-                            Ambient = Color3.fromRGB(25, 25, 40),
-                            Brightness = 1,
-                            ColorShift_Bottom = Color3.fromRGB(10, 10, 20),
-                            ColorShift_Top = Color3.fromRGB(10, 10, 30),
-                            OutdoorAmbient = Color3.fromRGB(25, 25, 40)
-                        }
-                        TweenService:Create(Lighting, tweenInfo, nightProps):Play()
+            if getgenv().DayNightCycleActive then
+                getgenv().DayNightCycleActive = false
+                showNotification("Dynamic Day/Night cycle disabled!", "info")
+            else
+                getgenv().DayNightCycleActive = true
+                showNotification("Dynamic Day/Night cycle enabled!", "success")
+                spawn(function()
+                    while getgenv().DayNightCycleActive do
+                        Lighting.ClockTime = Lighting.ClockTime + 0.01
+                        task.wait()
                     end
-                end
-            end)
-            showNotification("Dynamic Day/Night cycle enabled!", "success")
+                end)
+            end
         end
     },
     {
         name = "infinite_yield",
         category = "utility",
         premium = false,
+       
         description = "The classic admin commands script",
         func = function()
             loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
@@ -580,9 +805,9 @@ local ScriptLibrary = {
     {
         name = "esp_advanced",
         category = "combat",
-        premium = true,
+        premium = false,
         description = "Advanced ESP with customizable features",
-        func = toggleAdvancedESP
+        func = function() toggleAdvancedESP() end
     },
     {
         name = "fly_script",
@@ -591,23 +816,26 @@ local ScriptLibrary = {
         description = "Enhanced fly script with speed controls",
         func = function()
             local flying = false
+        
             local speed = 50
             local bodyVelocity, bodyAngularVelocity
             
             local function startFly()
                 local char = player.Character
                 if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-                
+          
                 local humanoidRootPart = char.HumanoidRootPart
                 
                 bodyVelocity = Instance.new("BodyVelocity")
                 bodyAngularVelocity = Instance.new("BodyAngularVelocity")
                 
-                bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+       
+                bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
                 bodyVelocity.Velocity = Vector3.new(0, 0, 0)
                 bodyVelocity.Parent = humanoidRootPart
                 
-                bodyAngularVelocity.MaxTorque = Vector3.new(4000, 4000, 4000)
+                bodyAngularVelocity.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+             
                 bodyAngularVelocity.AngularVelocity = Vector3.new(0, 0, 0)
                 bodyAngularVelocity.Parent = humanoidRootPart
                 
@@ -615,21 +843,25 @@ local ScriptLibrary = {
             end
             
             local function stopFly()
+   
                 flying = false
                 if bodyVelocity then bodyVelocity:Destroy() end
                 if bodyAngularVelocity then bodyAngularVelocity:Destroy() end
             end
             
             -- Toggle with F key
+     
             local flyConnection = UserInputService.InputBegan:Connect(function(input)
                 if input.KeyCode == Enum.KeyCode.F then
                     if flying then
                         stopFly()
+                        
                         showNotification("Fly disabled", "info")
                     else
                         startFly()
                         showNotification("Fly enabled - Use WASD to move", "success")
                     end
+   
                 end
             end)
             table.insert(HubState.Connections, flyConnection)
@@ -640,6 +872,7 @@ local ScriptLibrary = {
         category = "movement",
         premium = false,
         description = "Boost your character's speed",
+   
         func = function()
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then
@@ -647,6 +880,7 @@ local ScriptLibrary = {
                 showNotification("Speed boosted to 100!", "success")
             end
         end
+    
     },
     {
         name = "noclip",
@@ -656,15 +890,18 @@ local ScriptLibrary = {
         func = function()
             local noclip = false
             local function toggleNoclip()
+            
                 noclip = not noclip
                 local char = player.Character
                 if char then
                     for _, part in pairs(char:GetDescendants()) do
                         if part:IsA("BasePart") then
+     
                             part.CanCollide = not noclip
                         end
                     end
                 end
+              
                 showNotification("Noclip " .. (noclip and "enabled" or "disabled"), "success")
             end
             toggleNoclip()
@@ -672,12 +909,13 @@ local ScriptLibrary = {
                 if input.KeyCode == Enum.KeyCode.N then toggleNoclip() end
             end)
             table.insert(HubState.Connections, noclipConnection)
+    
         end
     },
     {
         name = "god_mode",
         category = "combat",
-        premium = true,
+        premium = false,
         description = "Enable god mode for invincibility with health regen",
         func = function()
             local char = player.Character
@@ -687,12 +925,14 @@ local ScriptLibrary = {
                 humanoid.Health = math.huge
                 
                 -- Regenerate health if damaged
+         
                 local regenConnection = humanoid.HealthChanged:Connect(function(health)
                     if health < math.huge then
+                        task.wait()
                         humanoid.Health = math.huge
                     end
                 end)
-                
+    
                 table.insert(HubState.Connections, regenConnection)
                 
                 showNotification("God mode enabled with auto-regen!", "success")
@@ -708,10 +948,12 @@ local ScriptLibrary = {
         description = "Automated farming script",
         func = function()
             spawn(function()
+        
                 while wait(1) do
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if obj:IsA("ClickDetector") then
                             fireclickdetector(obj)
+           
                         end
                     end
                 end
@@ -726,6 +968,7 @@ local ScriptLibrary = {
         description = "Make your character rainbow colored",
         func = function()
             local char = player.Character
+          
             if char then
                 spawn(function()
                     while wait(0.1) do
@@ -734,6 +977,7 @@ local ScriptLibrary = {
                                 part.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
                             end
                         end
+   
                     end
                 end)
                 showNotification("Rainbow character enabled!", "success")
@@ -764,6 +1008,7 @@ local ScriptLibrary = {
             local target = Players:FindFirstChild(targetName)
             if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+               
                 showNotification("Teleported to " .. targetName .. "!", "success")
             else
                 showNotification("Player not found! Enter name in search bar.", "error")
@@ -773,20 +1018,32 @@ local ScriptLibrary = {
     {
         name = "aimbot",
         category = "combat",
-        premium = true,
-        description = "Simple aimbot for precision targeting",
+        premium = false,
+        description = "Simple aimbot. Press Q to toggle on/off.",
         func = function()
+            if getgenv().aimbotToggleConnection then
+                getgenv().aimbotToggleConnection:Disconnect()
+                getgenv().aimbotToggleConnection = nil
+            end
+            if getgenv().aimbotHeartbeatConnection then
+                getgenv().aimbotHeartbeatConnection:Disconnect()
+                getgenv().aimbotHeartbeatConnection = nil
+            end
+
             local aimbotEnabled = true
+            
             local function getNearestEnemy()
                 local nearest, dist = nil, math.huge
                 local char = player.Character
                 if not char then return nil end
                 local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return nil end
+
                 for _, plr in pairs(Players:GetPlayers()) do
                     if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
                         local head = plr.Character.Head
                         local d = (head.Position - root.Position).Magnitude
-                        if d < dist then
+                        if d < dist and d > 0.1 then
                             dist = d
                             nearest = head
                         end
@@ -795,27 +1052,41 @@ local ScriptLibrary = {
                 return nearest
             end
             
-            local aimConnection = RunService.Heartbeat:Connect(function()
-                if not aimbotEnabled then return end
+            getgenv().aimbotHeartbeatConnection = RunService.Heartbeat:Connect(function()
+                if not aimbotEnabled or not mouse then return end
                 local target = getNearestEnemy()
-                if target then
-                    mousemoverel((target.Position - mouse.Hit.Position).Unit * 0.1)
+                if target and typeof(mouse.Hit) == "CFrame" then
+                    local targetPos = target.Position
+                    local cameraPos = workspace.CurrentCamera.CFrame.Position
+                    local direction = (targetPos - cameraPos).Unit
+                    workspace.CurrentCamera.CFrame = CFrame.new(cameraPos, cameraPos + direction)
                 end
             end)
+            table.insert(HubState.Connections, getgenv().aimbotHeartbeatConnection)
+
+            getgenv().aimbotToggleConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                if gameProcessed then return end
+                if input.KeyCode == Enum.KeyCode.Q then
+                    aimbotEnabled = not aimbotEnabled
+                    showNotification("Aimbot " .. (aimbotEnabled and "Enabled" or "Disabled"), "info")
+                end
+            end)
+            table.insert(HubState.Connections, getgenv().aimbotToggleConnection)
             
-            table.insert(HubState.Connections, aimConnection)
-            
-            showNotification("Simple Aimbot enabled (toggle again to disable)!", "success")
+            showNotification("Simple Aimbot enabled! Press Q to toggle.", "success")
         end
     },
     {
         name = "fullbright",
+  
         category = "visuals",
         premium = false,
         description = "Make the game fully bright",
         func = function()
             Lighting.Brightness = 2
             Lighting.GlobalShadows = false
+            Lighting.Ambient = Color3.fromRGB(180, 180, 180)
+            Lighting.OutdoorAmbient = Color3.fromRGB(180, 180, 180)
             Lighting.FogEnd = 9e9
             for _, v in pairs(Lighting:GetChildren()) do
                 if v:IsA("PostEffect") then v.Enabled = false end
@@ -827,10 +1098,11 @@ local ScriptLibrary = {
         name = "remove_fog",
         category = "visuals",
         premium = false,
+     
         description = "Remove fog from the game",
         func = function()
-            Lighting.FogEnd = math.huge
-            Lighting.FogStart = math.huge
+            Lighting.FogEnd = 1000000
+            Lighting.FogStart = 1000000
             showNotification("Fog removed!", "success")
         end
     }
@@ -842,6 +1114,7 @@ local ThemedElements = {}
 --// Utility Functions with Executor Compatibility
 local function createSound(id, volume)
     if not SoundService then
+      
         return {Play = function() end, Stop = function() end}
     end
     
@@ -857,9 +1130,7 @@ local function createSound(id, volume)
 end
 
 local function safeWait(time)
-    if wait then
-        return wait(time)
-    elseif task and task.wait then
+    if task and task.wait then
         return task.wait(time)
     else
         local start = tick()
@@ -881,6 +1152,7 @@ local function safeTween(object, info, props)
             for property, value in pairs(props) do
                 pcall(function()
                     object[property] = value
+           
                 end)
             end
         end)
@@ -910,6 +1182,7 @@ local function createParticle(parent, color)
         Position = UDim2.new(math.random(), 0, math.random(), 0),
         BackgroundTransparency = 1
     })
+ 
     tween:Play()
     
     return particle
@@ -934,13 +1207,16 @@ function applyTheme(themeName)
     if not theme then return end
     
     pcall(function()
-        Lighting.Blur.Size = theme.Blur and 20 or 0
+        if Lighting:FindFirstChild("Blur") then
+            Lighting.Blur.Size = theme.Blur and 20 or 0
+        end
     end)
     
     if theme.Particles then
         for _, particle in pairs(HubState.Particles) do
             if particle.Parent then
                 particle.BackgroundColor3 = theme.Accent
+        
             end
         end
     end
@@ -950,6 +1226,7 @@ function applyTheme(themeName)
             local props = {}
             if element.Properties.BackgroundColor3 then
                 props.BackgroundColor3 = theme[element.Properties.BackgroundColor3]
+            
             end
             if element.Properties.BackgroundTransparency then
                 props.BackgroundTransparency = theme[element.Properties.BackgroundTransparency]
@@ -957,6 +1234,7 @@ function applyTheme(themeName)
             if element.Properties.TextColor3 then
                 props.TextColor3 = theme[element.Properties.TextColor3]
             end
+            
             if element.Properties.BorderColor3 then
                 props.BorderColor3 = theme[element.Properties.BorderColor3]
             end
@@ -965,6 +1243,7 @@ function applyTheme(themeName)
                 safeTween(element.Element, TweenInfo.new(0.3, Enum.EasingStyle.Quad), props)
             end
         end
+   
     end
     
     showNotification("Theme changed to " .. themeName, "success")
@@ -980,31 +1259,39 @@ function applyLanguage(langCode)
         end
     end
     
-    showNotification("Language changed to " .. (Languages.en[langCode] or langCode), "success")
+    showNotification("Language changed to " .. (langCode), "success")
 end
 
 function toggleAdvancedESP()
-    local espEnabled = not HubState.ESPEnabled
-    HubState.ESPEnabled = espEnabled
-    
+    HubState.ESPEnabled = not HubState.ESPEnabled
+    local espEnabled = HubState.ESPEnabled
+
     if espEnabled then
         local ESPFolder = Instance.new("Folder")
         ESPFolder.Name = "ESP_Objects"
         ESPFolder.Parent = workspace
-        
+
         local function createESP(plr)
             if plr == player then return end
             
             local function addESPToCharacter(char)
-                if not char or ESPFolder.Parent ~= workspace then return end
+                if not char or not ESPFolder.Parent or ESPFolder:FindFirstChild("ESP_" .. plr.Name) then return end
                 
                 local humanoidRootPart = char:WaitForChild("HumanoidRootPart", 5)
                 if not humanoidRootPart then return end
+
+                local head = char:WaitForChild("Head", 5)
+                if not head then return end
                 
+                local espSize = char:GetExtentsSize() + Vector3.new(0,0.5,0)
+                if espSize.X == 0 or espSize.Y == 0 or espSize.Z == 0 then
+                    espSize = Vector3.new(4, 6, 2)
+                end
+
                 local ESPBox = Instance.new("BoxHandleAdornment")
                 ESPBox.Name = "ESP_" .. plr.Name
                 ESPBox.Parent = ESPFolder
-                ESPBox.Size = char:GetExtentsSize()
+                ESPBox.Size = espSize
                 ESPBox.Adornee = humanoidRootPart
                 ESPBox.AlwaysOnTop = true
                 ESPBox.ZIndex = 10
@@ -1014,7 +1301,7 @@ function toggleAdvancedESP()
                 local Billboard = Instance.new("BillboardGui")
                 Billboard.Name = "ESP_Billboard_" .. plr.Name
                 Billboard.Parent = ESPFolder
-                Billboard.Adornee = char:FindFirstChild("Head")
+                Billboard.Adornee = head
                 Billboard.Size = UDim2.new(0, 200, 0, 50)
                 Billboard.StudsOffset = Vector3.new(0, 3, 0)
                 Billboard.AlwaysOnTop = true
@@ -1032,6 +1319,7 @@ function toggleAdvancedESP()
                 
                 local DistanceLabel = Instance.new("TextLabel")
                 DistanceLabel.Parent = Billboard
+                DistanceLabel.Name = "DistanceLabel"
                 DistanceLabel.BackgroundTransparency = 1
                 DistanceLabel.Size = UDim2.new(1, 0, 0.5, 0)
                 DistanceLabel.Position = UDim2.new(0, 0, 0.5, 0)
@@ -1041,17 +1329,6 @@ function toggleAdvancedESP()
                 DistanceLabel.TextScaled = true
                 DistanceLabel.TextStrokeTransparency = 0
                 DistanceLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                
-                spawn(function()
-                    while DistanceLabel.Parent and player.Character do
-                        local localHRP = player.Character:FindFirstChild("HumanoidRootPart")
-                        if localHRP and humanoidRootPart then
-                            local distance = math.floor((localHRP.Position - humanoidRootPart.Position).Magnitude)
-                            DistanceLabel.Text = distance .. " studs"
-                        end
-                        wait(0.1)
-                    end
-                end)
                 
                 local humanoid = char:FindFirstChildOfClass("Humanoid")
                 if humanoid then
@@ -1070,40 +1347,66 @@ function toggleAdvancedESP()
                     
                     humanoid.HealthChanged:Connect(function()
                         HealthFill.Size = UDim2.new(humanoid.Health / humanoid.MaxHealth, 0, 1, 0)
-                        HealthFill.BackgroundColor3 = humanoid.Health > humanoid.MaxHealth * 0.5 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 0)
-                        if humanoid.Health < humanoid.MaxHealth * 0.25 then
+                        local healthRatio = humanoid.Health / humanoid.MaxHealth
+                        if healthRatio > 0.5 then
+                            HealthFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+                        elseif healthRatio > 0.25 then
+                            HealthFill.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
+                        else
                             HealthFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
                         end
                     end)
                 end
             end
             
-            if plr.Character then
-                addESPToCharacter(plr.Character)
-            end
-            
+            if plr.Character then addESPToCharacter(plr.Character) end
             plr.CharacterAdded:Connect(addESPToCharacter)
+            plr.CharacterAppearanceLoaded:Connect(addESPToCharacter)
         end
         
-        for _, plr in ipairs(Players:GetPlayers()) do
-            createESP(plr)
-        end
+        for _, plr in ipairs(Players:GetPlayers()) do createESP(plr) end
         
-        Players.PlayerAdded:Connect(createESP)
-        
-        Players.PlayerRemoving:Connect(function(plr)
-            for _, obj in ipairs(ESPFolder:GetChildren()) do
+        local playerAddedConnection = Players.PlayerAdded:Connect(createESP)
+        table.insert(HubState.Connections, playerAddedConnection)
+
+        local playerRemovingConnection = Players.PlayerRemoving:Connect(function(plr)
+            if not workspace:FindFirstChild("ESP_Objects") then return end
+            for _, obj in ipairs(workspace.ESP_Objects:GetChildren()) do
                 if obj.Name:find(plr.Name) then
                     obj:Destroy()
                 end
             end
         end)
-        
+        table.insert(HubState.Connections, playerRemovingConnection)
+
+        local espUpdateConnection = RunService.Heartbeat:Connect(function()
+            if not HubState.ESPEnabled or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+            local localHRP = player.Character.HumanoidRootPart
+            if not workspace:FindFirstChild("ESP_Objects") then return end
+
+            for _, obj in ipairs(workspace.ESP_Objects:GetChildren()) do
+                if obj:IsA("BillboardGui") and obj.Adornee and obj.Adornee.Parent and obj.Adornee.Parent:FindFirstChild("HumanoidRootPart") then
+                    local distanceLabel = obj:FindFirstChild("DistanceLabel")
+                    if distanceLabel then
+                        local targetHRP = obj.Adornee.Parent.HumanoidRootPart
+                        local distance = math.floor((localHRP.Position - targetHRP.Position).Magnitude)
+                        distanceLabel.Text = distance .. " studs"
+                    end
+                end
+            end
+        end)
+        table.insert(HubState.Connections, espUpdateConnection)
+
         showNotification("Advanced ESP enabled with health bars and distance!", "success")
     else
         local ESPFolder = workspace:FindFirstChild("ESP_Objects")
-        if ESPFolder then
-            ESPFolder:Destroy()
+        if ESPFolder then ESPFolder:Destroy() end
+        -- Disconnect connections to prevent memory leaks
+        for i, conn in ipairs(HubState.Connections) do
+            if conn and conn.Connected then
+                conn:Disconnect()
+            end
+            HubState.Connections[i] = nil
         end
         showNotification("ESP disabled", "info")
     end
@@ -1136,6 +1439,7 @@ function createMainUI()
     
     table.insert(ThemedElements, {
         Element = MainFrame,
+        
         Properties = {BackgroundColor3 = "Background", BackgroundTransparency = "BackgroundTransparency"}
     })
     
@@ -1150,6 +1454,7 @@ function createMainUI()
     table.insert(ThemedElements, {
         Element = BlurFrame,
         Properties = {BackgroundColor3 = "Secondary", BackgroundTransparency = "SecondaryTransparency"}
+   
     })
     
     local Corner = Instance.new("UICorner")
@@ -1164,6 +1469,7 @@ function createMainUI()
     }
     Gradient.Transparency = NumberSequence.new{
         NumberSequenceKeypoint.new(0, 0.8),
+      
         NumberSequenceKeypoint.new(0.5, 0.95),
         NumberSequenceKeypoint.new(1, 0.8)
     }
@@ -1178,6 +1484,7 @@ function createMainUI()
     spawn(function()
         while wait(0.5) do
             if #ParticleContainer:GetChildren() < 20 then
+      
                 local particle = createParticle(ParticleContainer, Themes[HubState.CurrentTheme].Accent)
                 table.insert(HubState.Particles, particle)
             end
@@ -1190,6 +1497,7 @@ function createMainUI()
     Header.BackgroundTransparency = 1
     Header.Parent = MainFrame
     
+   
     table.insert(ThemedElements, {
         Element = Header,
         Properties = {BackgroundColor3 = "Primary", BackgroundTransparency = "PrimaryTransparency"}
@@ -1200,6 +1508,7 @@ function createMainUI()
             HubState.Draggable = true
             HubState.DragStart = input.Position
             HubState.StartPos = MainFrame.Position
+       
         end
     end)
     
@@ -1212,6 +1521,7 @@ function createMainUI()
     UserInputService.InputChanged:Connect(function(input)
         if HubState.Draggable and input.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = input.Position - HubState.DragStart
+          
             MainFrame.Position = UDim2.new(
                 HubState.StartPos.X.Scale, HubState.StartPos.X.Offset + delta.X,
                 HubState.StartPos.Y.Scale, HubState.StartPos.Y.Offset + delta.Y
@@ -1239,7 +1549,7 @@ function createMainUI()
     
     local TitleGlow = Title:Clone()
     TitleGlow.Size = UDim2.new(1, 4, 1, 4)
-    TitleGlow.Position = UDim2.new(0, -2, 0, -2)
+    TitleGlow.Position = UDim2.new(0, 18, 0, 2)
     TitleGlow.TextColor3 = Color3.fromRGB(120, 110, 255)
     TitleGlow.TextTransparency = 0.7
     TitleGlow.ZIndex = Title.ZIndex - 1
@@ -1249,6 +1559,7 @@ function createMainUI()
         local button = Instance.new("TextButton")
         button.Size = UDim2.new(0, 40, 0, 40)
         button.Position = position
+       
         button.AnchorPoint = Vector2.new(0.5, 0.5)
         button.BackgroundColor3 = color
         button.BackgroundTransparency = 0.3
@@ -1259,6 +1570,7 @@ function createMainUI()
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
         button.Parent = Header
         
+      
         table.insert(ThemedElements, {
             Element = button,
             Properties = {BackgroundColor3 = "Accent", TextColor3 = "Text"}
@@ -1268,6 +1580,7 @@ function createMainUI()
         buttonCorner.CornerRadius = UDim.new(1, 0)
         buttonCorner.Parent = button
         
+        
         button.MouseEnter:Connect(function()
             safeTween(button, TweenInfo.new(0.2), {
                 BackgroundTransparency = 0.1,
@@ -1276,6 +1589,7 @@ function createMainUI()
         end)
         
         button.MouseLeave:Connect(function()
+           
             safeTween(button, TweenInfo.new(0.2), {
                 BackgroundTransparency = 0.3,
                 Size = UDim2.new(0, 40, 0, 40)
@@ -1299,6 +1613,7 @@ function createMainUI()
     
     table.insert(ThemedElements, {
         Element = Sidebar,
+   
         Properties = {BackgroundColor3 = "Secondary", BackgroundTransparency = "SecondaryTransparency"}
     })
     
@@ -1341,6 +1656,7 @@ function createMainUI()
         TabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
         TabButton.BackgroundTransparency = 0.2
         TabButton.BorderSizePixel = 0
+ 
         TabButton.LayoutOrder = order
         TabButton.Font = Enum.Font.GothamSemibold
         TabButton.TextSize = 16
@@ -1350,14 +1666,16 @@ function createMainUI()
         TabButton.Parent = Sidebar
         
         table.insert(ThemedElements, {
+  
             Element = TabButton,
-            Properties = {BackgroundColor3 = "Primary", BackgroundTransparency = "PrimaryTransparency", TextColor3 = "Text", TextKey = langKey}
+            Properties = {BackgroundColor3 = "Primary", BackgroundTransparency = "PrimaryTransparency", TextColor3 = "Text"}
         })
         
         local TabCorner = Instance.new("UICorner")
         TabCorner.CornerRadius = UDim.new(0, 8)
         TabCorner.Parent = TabButton
         
+       
         local TabContent = Instance.new("ScrollingFrame")
         TabContent.Name = name .. "Content"
         TabContent.Size = UDim2.new(1, 0, 1, 0)
@@ -1367,6 +1685,7 @@ function createMainUI()
         TabContent.ScrollBarImageColor3 = Color3.fromRGB(120, 110, 255)
         TabContent.ScrollBarImageTransparency = 0.3
         TabContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+      
         TabContent.AutomaticCanvasSize = Enum.AutomaticSize.Y
         TabContent.Visible = false
         TabContent.Parent = ContentArea
@@ -1386,6 +1705,7 @@ function createMainUI()
         
         TabButton.MouseEnter:Connect(function()
             if HubState.CurrentTab ~= name then
+        
                 safeTween(TabButton, TweenInfo.new(0.2), {
                     BackgroundTransparency = 0.1,
                     TextColor3 = Themes[HubState.CurrentTheme].Accent
@@ -1393,11 +1713,13 @@ function createMainUI()
             end
         end)
         
+  
         TabButton.MouseLeave:Connect(function()
             if HubState.CurrentTab ~= name then
                 safeTween(TabButton, TweenInfo.new(0.2), {
                     BackgroundTransparency = 0.2,
                     TextColor3 = Themes[HubState.CurrentTheme].Text
+                
                 })
             end
         end)
@@ -1413,14 +1735,14 @@ function createMainUI()
     local ScriptsTab = createTab("Scripts", "⚡", 2, "scripts_tab")
     local VisualsTab = createTab("Visuals", "🎨", 3, "visuals_tab")
     local SettingsTab = createTab("Settings", "⚙️", 4, "settings_tab")
-    local PremiumTab = createTab("Premium", "👑", 5, "premium_tab")
-    local InfoTab = createTab("Info", "ℹ️", 6, "info_tab")
+    local InfoTab = createTab("Info", "ℹ️", 5, "info_tab")
     
     function switchTab(tabName)
         if HubState.CurrentTab == tabName then return end
         
         for name, tab in pairs(Tabs) do
             tab.Visible = false
+ 
             safeTween(TabButtons[name], TweenInfo.new(0.2), {
                 BackgroundTransparency = 0.2,
                 TextColor3 = Themes[HubState.CurrentTheme].Text
@@ -1437,6 +1759,7 @@ function createMainUI()
         
         HubState.CurrentTab = tabName
         
+   
         pcall(function()
             createSound(421058925, 0.3):Play()
         end)
@@ -1448,6 +1771,7 @@ function createMainUI()
         WelcomeSection.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
         WelcomeSection.BackgroundTransparency = 0.2
         WelcomeSection.BorderSizePixel = 0
+    
         WelcomeSection.Parent = DashboardTab
         
         table.insert(ThemedElements, {
@@ -1457,6 +1781,7 @@ function createMainUI()
         
         local WelcomeCorner = Instance.new("UICorner")
         WelcomeCorner.CornerRadius = UDim.new(0, 12)
+      
         WelcomeCorner.Parent = WelcomeSection
         
         local WelcomePadding = Instance.new("UIPadding")
@@ -1467,6 +1792,7 @@ function createMainUI()
         WelcomePadding.Parent = WelcomeSection
         
         local WelcomeTitle = Instance.new("TextLabel")
+    
         WelcomeTitle.Size = UDim2.new(1, 0, 0, 35)
         WelcomeTitle.BackgroundTransparency = 1
         WelcomeTitle.Text = Languages[HubState.CurrentLanguage].dashboard_welcome .. player.DisplayName
@@ -1478,13 +1804,14 @@ function createMainUI()
         
         table.insert(ThemedElements, {
             Element = WelcomeTitle,
-            Properties = {TextColor3 = "Text", TextKey = "dashboard_welcome"}
+            Properties = {TextColor3 = "Text"}
         })
         
         local WelcomeSubtitle = Instance.new("TextLabel")
         WelcomeSubtitle.Size = UDim2.new(1, 0, 0, 25)
         WelcomeSubtitle.Position = UDim2.new(0, 0, 0, 40)
         WelcomeSubtitle.BackgroundTransparency = 1
+    
         WelcomeSubtitle.Text = Languages[HubState.CurrentLanguage].dashboard_subtitle
         WelcomeSubtitle.Font = Enum.Font.Gotham
         WelcomeSubtitle.TextSize = 16
@@ -1494,6 +1821,7 @@ function createMainUI()
         
         table.insert(ThemedElements, {
             Element = WelcomeSubtitle,
+           
             Properties = {TextColor3 = "TextSecondary", TextKey = "dashboard_subtitle"}
         })
         
@@ -1513,7 +1841,7 @@ function createMainUI()
         local StatsCorner = Instance.new("UICorner")
         StatsCorner.CornerRadius = UDim.new(0, 12)
         StatsCorner.Parent = StatsSection
-        
+  
         local StatsTitle = Instance.new("TextLabel")
         StatsTitle.Size = UDim2.new(1, 0, 0, 30)
         StatsTitle.Position = UDim2.new(0, 20, 0, 10)
@@ -1522,6 +1850,7 @@ function createMainUI()
         StatsTitle.Font = Enum.Font.GothamBold
         StatsTitle.TextSize = 20
         StatsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+  
         StatsTitle.TextXAlignment = Enum.TextXAlignment.Left
         StatsTitle.Parent = StatsSection
         
@@ -1531,6 +1860,7 @@ function createMainUI()
         })
         
         local FPSLabel = Instance.new("TextLabel")
+     
         FPSLabel.Size = UDim2.new(0.3, 0, 0, 25)
         FPSLabel.Position = UDim2.new(0, 20, 0, 50)
         FPSLabel.BackgroundTransparency = 1
@@ -1540,7 +1870,7 @@ function createMainUI()
         FPSLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
         FPSLabel.TextXAlignment = Enum.TextXAlignment.Left
         FPSLabel.Parent = StatsSection
-        
+    
         table.insert(ThemedElements, {
             Element = FPSLabel,
             Properties = {TextColor3 = "Text"}
@@ -1549,6 +1879,7 @@ function createMainUI()
         local PingLabel = Instance.new("TextLabel")
         PingLabel.Size = UDim2.new(0.3, 0, 0, 25)
         PingLabel.Position = UDim2.new(0.35, 0, 0, 50)
+    
         PingLabel.BackgroundTransparency = 1
         PingLabel.Text = "Ping: " .. HubState.Performance.Ping .. "ms"
         PingLabel.Font = Enum.Font.GothamSemibold
@@ -1558,6 +1889,7 @@ function createMainUI()
         PingLabel.Parent = StatsSection
         
         table.insert(ThemedElements, {
+          
             Element = PingLabel,
             Properties = {TextColor3 = "Text"}
         })
@@ -1567,6 +1899,7 @@ function createMainUI()
         MemoryLabel.Position = UDim2.new(0.7, 0, 0, 50)
         MemoryLabel.BackgroundTransparency = 1
         MemoryLabel.Text = "Memory: " .. HubState.Performance.Memory .. "MB"
+  
         MemoryLabel.Font = Enum.Font.GothamSemibold
         MemoryLabel.TextSize = 16
         MemoryLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
@@ -1576,12 +1909,14 @@ function createMainUI()
         table.insert(ThemedElements, {
             Element = MemoryLabel,
             Properties = {TextColor3 = "Text"}
+   
         })
         
         spawn(function()
             while wait(1) do
                 if FPSLabel.Parent then
                     FPSLabel.Text = (Languages[HubState.CurrentLanguage].fps_label or "FPS") .. ": " .. HubState.Performance.FPS
+                  
                     PingLabel.Text = (Languages[HubState.CurrentLanguage].ping_label or "Ping") .. ": " .. HubState.Performance.Ping .. "ms"
                     MemoryLabel.Text = (Languages[HubState.CurrentLanguage].memory_label or "Memory") .. ": " .. HubState.Performance.Memory .. "MB"
                 end
@@ -1590,6 +1925,7 @@ function createMainUI()
     end
     
     createDashboardContent()
+    
     
     local function createScriptsContent()
         local SearchBar = Instance.new("TextBox")
@@ -1600,6 +1936,7 @@ function createMainUI()
         SearchBar.PlaceholderText = Languages[HubState.CurrentLanguage].scripts_search or "Search scripts..."
         SearchBar.PlaceholderColor3 = Color3.fromRGB(150, 150, 170)
         SearchBar.Text = ""
+       
         SearchBar.Font = Enum.Font.Gotham
         SearchBar.TextSize = 16
         SearchBar.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -1609,6 +1946,7 @@ function createMainUI()
         table.insert(ThemedElements, {
             Element = SearchBar,
             Properties = {BackgroundColor3 = "Primary", BackgroundTransparency = "PrimaryTransparency", TextColor3 = "Text"}
+  
         })
         
         local SearchCorner = Instance.new("UICorner")
@@ -1619,6 +1957,7 @@ function createMainUI()
         SearchPadding.PaddingLeft = UDim.new(0, 15)
         SearchPadding.Parent = SearchBar
         
+      
         local categories = {"all", "visuals", "movement", "combat", "utility", "fun"}
         local activeCategory = "all"
         
@@ -1649,22 +1988,25 @@ function createMainUI()
                 Element = CategoryButton,
                 Properties = {BackgroundColor3 = "Primary", TextColor3 = "Text"}
             })
-            
+       
             local CategoryCorner = Instance.new("UICorner")
             CategoryCorner.CornerRadius = UDim.new(0, 6)
             CategoryCorner.Parent = CategoryButton
             
             CategoryButton.MouseButton1Click:Connect(function()
                 activeCategory = cat
+         
                 for _, button in ipairs(CategoryContainer:GetChildren()) do
                     if button:IsA("TextButton") then
                         local isActive = button.Text:lower() == cat
                         safeTween(button, TweenInfo.new(0.2), {
+           
                             BackgroundColor3 = isActive and Themes[HubState.CurrentTheme].Accent or Themes[HubState.CurrentTheme].Primary
                         })
                     end
                 end
             end)
+     
         end
         
         local ScriptsContainer = Instance.new("Frame")
@@ -1675,6 +2017,7 @@ function createMainUI()
         
         local ScriptsList = Instance.new("UIListLayout")
         ScriptsList.Padding = UDim.new(0, 10)
+     
         ScriptsList.Parent = ScriptsContainer
         
         for _, script in ipairs(ScriptLibrary) do
@@ -1682,6 +2025,7 @@ function createMainUI()
             ScriptFrame.Size = UDim2.new(1, 0, 0, 80)
             ScriptFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
             ScriptFrame.BackgroundTransparency = 0.2
+            
             ScriptFrame.BorderSizePixel = 0
             ScriptFrame.Parent = ScriptsContainer
             
@@ -1689,13 +2033,14 @@ function createMainUI()
                 Element = ScriptFrame,
                 Properties = {BackgroundColor3 = "Primary", BackgroundTransparency = "PrimaryTransparency"}
             })
-            
+      
             local ScriptCorner = Instance.new("UICorner")
             ScriptCorner.CornerRadius = UDim.new(0, 10)
             ScriptCorner.Parent = ScriptFrame
             
             local ScriptTitle = Instance.new("TextLabel")
             ScriptTitle.Size = UDim2.new(0.6, 0, 0, 30)
+      
             ScriptTitle.Position = UDim2.new(0, 15, 0, 10)
             ScriptTitle.BackgroundTransparency = 1
             ScriptTitle.Text = Languages[HubState.CurrentLanguage][script.name] or script.name
@@ -1703,6 +2048,7 @@ function createMainUI()
             ScriptTitle.TextSize = 18
             ScriptTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
             ScriptTitle.TextXAlignment = Enum.TextXAlignment.Left
+ 
             ScriptTitle.Parent = ScriptFrame
             
             table.insert(ThemedElements, {
@@ -1716,6 +2062,7 @@ function createMainUI()
             ScriptDesc.BackgroundTransparency = 1
             ScriptDesc.Text = script.description
             ScriptDesc.Font = Enum.Font.Gotham
+         
             ScriptDesc.TextSize = 14
             ScriptDesc.TextColor3 = Color3.fromRGB(180, 180, 200)
             ScriptDesc.TextXAlignment = Enum.TextXAlignment.Left
@@ -1723,6 +2070,7 @@ function createMainUI()
             ScriptDesc.Parent = ScriptFrame
             
             table.insert(ThemedElements, {
+            
                 Element = ScriptDesc,
                 Properties = {TextColor3 = "TextSecondary"}
             })
@@ -1730,6 +2078,7 @@ function createMainUI()
             local ExecuteButton = Instance.new("TextButton")
             ExecuteButton.Size = UDim2.new(0, 100, 0, 35)
             ExecuteButton.Position = UDim2.new(1, -120, 0.5, -17.5)
+ 
             ExecuteButton.AnchorPoint = Vector2.new(0, 0.5)
             ExecuteButton.BackgroundColor3 = Color3.fromRGB(120, 110, 255)
             ExecuteButton.BackgroundTransparency = 0.1
@@ -1743,66 +2092,56 @@ function createMainUI()
             table.insert(ThemedElements, {
                 Element = ExecuteButton,
                 Properties = {BackgroundColor3 = "Accent", TextColor3 = "Text"}
+    
             })
             
             local ExecuteCorner = Instance.new("UICorner")
             ExecuteCorner.CornerRadius = UDim.new(0, 8)
             ExecuteCorner.Parent = ExecuteButton
             
-            if script.premium then
-                local PremiumBadge = Instance.new("TextLabel")
-                PremiumBadge.Size = UDim2.new(0, 60, 0, 20)
-                PremiumBadge.Position = UDim2.new(1, -75, 0, 5)
-                PremiumBadge.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-                PremiumBadge.BackgroundTransparency = 0.1
-                PremiumBadge.BorderSizePixel = 0
-                PremiumBadge.Text = "PRO"
-                PremiumBadge.Font = Enum.Font.GothamBold
-                PremiumBadge.TextSize = 12
-                PremiumBadge.TextColor3 = Color3.fromRGB(0, 0, 0)
-                PremiumBadge.Parent = ScriptFrame
-                
-                local PremiumCorner = Instance.new("UICorner")
-                PremiumCorner.CornerRadius = UDim.new(0, 4)
-                PremiumCorner.Parent = PremiumBadge
-            end
-            
+     
             ExecuteButton.MouseEnter:Connect(function()
                 safeTween(ExecuteButton, TweenInfo.new(0.2), {
                     BackgroundTransparency = 0.05,
                     Size = UDim2.new(0, 105, 0, 37)
                 })
+            
             end)
             
             ExecuteButton.MouseLeave:Connect(function()
                 safeTween(ExecuteButton, TweenInfo.new(0.2), {
                     BackgroundTransparency = 0.1,
                     Size = UDim2.new(0, 100, 0, 35)
+           
                 })
             end)
             
             ExecuteButton.MouseButton1Click:Connect(function()
                 if script.func then
                     script.func()
-                    table.insert(HubState.ScriptHistory, script.name)
-                    showNotification(Languages[HubState.CurrentLanguage].script_executed, "success")
+                    if #HubState.ScriptHistory == 0 or HubState.ScriptHistory[#HubState.ScriptHistory] ~= script.name then
+                        table.insert(HubState.ScriptHistory, script.name)
+                    end
                 end
             end)
         end
         
         SearchBar:GetPropertyChangedSignal("Text"):Connect(function()
             local query = SearchBar.Text:lower()
+            
             for _, child in pairs(ScriptsContainer:GetChildren()) do
                 if child:IsA("Frame") then
                     local title = child:FindFirstChildOfClass("TextLabel")
                     if title and title.Text:lower():find(query) then
                         child.Visible = true
+    
                     else
                         child.Visible = false
                     end
                 end
             end
         end)
+  
     end
     
     createScriptsContent()
@@ -1815,6 +2154,7 @@ function createMainUI()
         VisualsTitle.Font = Enum.Font.GothamBold
         VisualsTitle.TextSize = 24
         VisualsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+  
         VisualsTitle.Parent = VisualsTab
         
         table.insert(ThemedElements, {
@@ -1824,6 +2164,7 @@ function createMainUI()
         
         local VisualsList = Instance.new("UIListLayout")
         VisualsList.Padding = UDim.new(0, 10)
+       
         VisualsList.Parent = VisualsTab
         
         for _, script in ipairs(ScriptLibrary) do
@@ -1836,17 +2177,20 @@ function createMainUI()
                 VisualButton.Font = Enum.Font.GothamSemibold
                 VisualButton.TextSize = 18
                 VisualButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+     
                 VisualButton.TextXAlignment = Enum.TextXAlignment.Left
                 VisualButton.Parent = VisualsTab
                 
                 table.insert(ThemedElements, {
                     Element = VisualButton,
+              
                     Properties = {TextColor3 = "Text"}
                 })
                 
                 VisualButton.MouseButton1Click:Connect(function()
                     script.func()
                 end)
+      
             end
         end
     end
@@ -1859,6 +2203,7 @@ function createMainUI()
         ThemeSection.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
         ThemeSection.BackgroundTransparency = 0.2
         ThemeSection.BorderSizePixel = 0
+        
         ThemeSection.Parent = SettingsTab
         
         table.insert(ThemedElements, {
@@ -1887,6 +2232,7 @@ function createMainUI()
         })
         
         local ThemeGrid = Instance.new("Frame")
+   
         ThemeGrid.Size = UDim2.new(1, -40, 1, -50)
         ThemeGrid.Position = UDim2.new(0, 20, 0, 40)
         ThemeGrid.BackgroundTransparency = 1
@@ -1896,12 +2242,13 @@ function createMainUI()
         ThemeLayout.CellSize = UDim2.new(0, 90, 0, 30)
         ThemeLayout.CellPadding = UDim2.new(0, 8, 0, 8)
         ThemeLayout.Parent = ThemeGrid
-        
+  
         local themeOrder = {"Glassmorphism", "CyberNeon", "Sunset", "Ocean", "Forest", "Pastel", "Monochrome", "Galaxy", "Fire", "Ice", "Retro", "Matrix"}
         for _, themeName in ipairs(themeOrder) do
             local themeData = Themes[themeName]
             local ThemeButton = Instance.new("TextButton")
             ThemeButton.Size = UDim2.new(0, 90, 0, 30)
+            
             ThemeButton.BackgroundColor3 = themeData.Accent
             ThemeButton.BackgroundTransparency = 0.1
             ThemeButton.BorderSizePixel = 0
@@ -1909,6 +2256,7 @@ function createMainUI()
             ThemeButton.Font = Enum.Font.GothamSemibold
             ThemeButton.TextSize = 12
             ThemeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            
             ThemeButton.Parent = ThemeGrid
             
             table.insert(ThemedElements, {
@@ -1916,6 +2264,7 @@ function createMainUI()
                 Properties = {BackgroundColor3 = "Accent", TextColor3 = "Text"}
             })
             
+        
             local ThemeButtonCorner = Instance.new("UICorner")
             ThemeButtonCorner.CornerRadius = UDim.new(0, 6)
             ThemeButtonCorner.Parent = ThemeButton
@@ -1923,10 +2272,12 @@ function createMainUI()
             ThemeButton.MouseButton1Click:Connect(function()
                 applyTheme(themeName)
                 if Gradient then
+      
                     Gradient.Color = ColorSequence.new{
                         ColorSequenceKeypoint.new(0, themeData.Accent),
                         ColorSequenceKeypoint.new(0.5, themeData.Background),
                         ColorSequenceKeypoint.new(1, themeData.AccentGlow)
+         
                     }
                 end
             end)
@@ -1934,7 +2285,8 @@ function createMainUI()
             ThemeButton.MouseEnter:Connect(function()
                 safeTween(ThemeButton, TweenInfo.new(0.2), {BackgroundTransparency = 0.05})
             end)
-            
+     
+        
             ThemeButton.MouseLeave:Connect(function()
                 safeTween(ThemeButton, TweenInfo.new(0.2), {BackgroundTransparency = 0.1})
             end)
@@ -1951,6 +2303,7 @@ function createMainUI()
         table.insert(ThemedElements, {
             Element = LanguageSection,
             Properties = {BackgroundColor3 = "Primary", BackgroundTransparency = "PrimaryTransparency"}
+       
         })
         
         local LanguageCorner = Instance.new("UICorner")
@@ -1961,6 +2314,7 @@ function createMainUI()
         LanguageTitle.Size = UDim2.new(1, 0, 0, 30)
         LanguageTitle.Position = UDim2.new(0, 20, 0, 10)
         LanguageTitle.BackgroundTransparency = 1
+    
         LanguageTitle.Text = Languages[HubState.CurrentLanguage].language_label or "Language"
         LanguageTitle.Font = Enum.Font.GothamBold
         LanguageTitle.TextSize = 20
@@ -1970,6 +2324,7 @@ function createMainUI()
         
         table.insert(ThemedElements, {
             Element = LanguageTitle,
+         
             Properties = {TextColor3 = "Text", TextKey = "language_label"}
         })
         
@@ -1987,6 +2342,7 @@ function createMainUI()
         local languageNames = {
             en = "English", es = "Español", fr = "Français", de = "Deutsch",
             pt = "Português", ru = "Русский", ja = "日本語", ko = "한국어"
+  
         }
         
         for langCode, langName in pairs(languageNames) do
@@ -1994,6 +2350,7 @@ function createMainUI()
             LangButton.Size = UDim2.new(0, 80, 0, 30)
             LangButton.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
             LangButton.BackgroundTransparency = 0.2
+           
             LangButton.BorderSizePixel = 0
             LangButton.Text = langName
             LangButton.Font = Enum.Font.GothamSemibold
@@ -2008,6 +2365,7 @@ function createMainUI()
             
             local LangCorner = Instance.new("UICorner")
             LangCorner.CornerRadius = UDim.new(0, 6)
+     
             LangCorner.Parent = LangButton
             
             LangButton.MouseButton1Click:Connect(function()
@@ -2035,8 +2393,9 @@ function createMainUI()
         local AdvancedTitle = Instance.new("TextLabel")
         AdvancedTitle.Size = UDim2.new(1, 0, 0, 30)
         AdvancedTitle.Position = UDim2.new(0, 20, 0, 10)
+    
         AdvancedTitle.BackgroundTransparency = 1
-        AdvancedTitle.Text = "Advanced Settings"
+        AdvancedTitle.Text = "Hotkey Settings"
         AdvancedTitle.Font = Enum.Font.GothamBold
         AdvancedTitle.TextSize = 20
         AdvancedTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -2054,6 +2413,7 @@ function createMainUI()
         HotkeyContainer.BackgroundTransparency = 1
         HotkeyContainer.Parent = AdvancedSection
         
+   
         local HotkeyLayout = Instance.new("UIListLayout")
         HotkeyLayout.Padding = UDim.new(0, 10)
         HotkeyLayout.Parent = HotkeyContainer
@@ -2062,6 +2422,7 @@ function createMainUI()
             local HotkeyFrame = Instance.new("Frame")
             HotkeyFrame.Size = UDim2.new(1, 0, 0, 30)
             HotkeyFrame.BackgroundTransparency = 1
+     
             HotkeyFrame.Parent = HotkeyContainer
             
             local HotkeyLabel = Instance.new("TextLabel")
@@ -2069,6 +2430,7 @@ function createMainUI()
             HotkeyLabel.BackgroundTransparency = 1
             HotkeyLabel.Text = Languages[HubState.CurrentLanguage][langKey] or name
             HotkeyLabel.Font = Enum.Font.Gotham
+   
             HotkeyLabel.TextSize = 16
             HotkeyLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
             HotkeyLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -2076,12 +2438,14 @@ function createMainUI()
             
             table.insert(ThemedElements, {
                 Element = HotkeyLabel,
+  
                 Properties = {TextColor3 = "TextSecondary", TextKey = langKey}
             })
             
             local HotkeyButton = Instance.new("TextButton")
             HotkeyButton.Size = UDim2.new(0, 100, 0, 25)
             HotkeyButton.Position = UDim2.new(1, -100, 0.5, -12.5)
+      
             HotkeyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
             HotkeyButton.BackgroundTransparency = 0.2
             HotkeyButton.BorderSizePixel = 0
@@ -2089,6 +2453,7 @@ function createMainUI()
             HotkeyButton.Font = Enum.Font.GothamSemibold
             HotkeyButton.TextSize = 14
             HotkeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    
             HotkeyButton.Parent = HotkeyFrame
             
             table.insert(ThemedElements, {
@@ -2105,47 +2470,12 @@ function createMainUI()
         createHotkeySetting("Emergency Hide", "F1", "emergency_hide")
         createHotkeySetting("Quick Execute", "F2", "quick_execute")
     end
-    
+   
     createSettingsContent()
-    
-    local function createPremiumContent()
-        local PremiumTitle = Instance.new("TextLabel")
-        PremiumTitle.Size = UDim2.new(1, 0, 0, 30)
-        PremiumTitle.BackgroundTransparency = 1
-        PremiumTitle.Text = "Premium Features"
-        PremiumTitle.Font = Enum.Font.GothamBold
-        PremiumTitle.TextSize = 24
-        PremiumTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
-        PremiumTitle.Parent = PremiumTab
-        
-        local PremiumList = Instance.new("UIListLayout")
-        PremiumList.Padding = UDim.new(0, 10)
-        PremiumList.Parent = PremiumTab
-        
-        for _, script in ipairs(ScriptLibrary) do
-            if script.premium then
-                local PremiumItem = Instance.new("TextLabel")
-                PremiumItem.Size = UDim2.new(1, 0, 0, 40)
-                PremiumItem.BackgroundTransparency = 1
-                PremiumItem.Text = "• " .. (Languages[HubState.CurrentLanguage][script.name] or script.name)
-                PremiumItem.Font = Enum.Font.Gotham
-                PremiumItem.TextSize = 18
-                PremiumItem.TextColor3 = Color3.fromRGB(255, 255, 255)
-                PremiumItem.TextXAlignment = Enum.TextXAlignment.Left
-                PremiumItem.Parent = PremiumTab
-                
-                table.insert(ThemedElements, {
-                    Element = PremiumItem,
-                    Properties = {TextColor3 = "Text"}
-                })
-            end
-        end
-    end
-    
-    createPremiumContent()
     
     local function createInfoContent()
         local InfoContainer = Instance.new("Frame")
+  
         InfoContainer.Size = UDim2.new(1, 0, 1, 0)
         InfoContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
         InfoContainer.BackgroundTransparency = 0.2
@@ -2164,6 +2494,7 @@ function createMainUI()
         local InfoPadding = Instance.new("UIPadding")
         InfoPadding.PaddingTop = UDim.new(0, 30)
         InfoPadding.PaddingLeft = UDim.new(0, 30)
+        
         InfoPadding.PaddingRight = UDim.new(0, 30)
         InfoPadding.PaddingBottom = UDim.new(0, 30)
         InfoPadding.Parent = InfoContainer
@@ -2183,11 +2514,13 @@ function createMainUI()
             Properties = {TextColor3 = "Text"}
         })
         
+     
         local InfoDescription = Instance.new("TextLabel")
         InfoDescription.Size = UDim2.new(1, 0, 1, -50)
         InfoDescription.Position = UDim2.new(0, 0, 0, 50)
         InfoDescription.BackgroundTransparency = 1
-        InfoDescription.Text = Languages[HubState.CurrentLanguage].version_info or "Hub Version: 2.2 Ultimate (Updated 2025)\nLast Updated: September 18, 2025\nScripts Available: 35+\nPremium Features: Unlocked\n\n✨ Features:\n• Modern glassmorphism UI\n• 8 language support\n• 12 premium themes\n• Advanced script library\n• Performance monitoring\n• Custom hotkey system\n• Auto-updater\n• Advanced ESP\n• Particle effects\n• Sound effects\n\n💎 Thank you for using 0_0 Hub Ultimate!"
+        InfoDescription.Text = Languages[HubState.CurrentLanguage].version_info or "Hub Version: 2.2 Ultimate (Updated 2025)\nLast Updated: September 21, 2025\nScripts Available: 35+\nPremium Features: Unlocked\n\n✨ Features:\n• Modern glassmorphism UI\n• 8 language support\n• 12 premium themes\n• Advanced script library\n• Performance monitoring\n• Custom hotkey system\n• Auto-updater\n• Advanced ESP\n• Particle effects\n• Sound effects\n\n💎 Thank you for using 0_0 Hub Ultimate!"
+ 
         InfoDescription.Font = Enum.Font.Gotham
         InfoDescription.TextSize = 16
         InfoDescription.TextColor3 = Color3.fromRGB(200, 200, 220)
@@ -2197,43 +2530,40 @@ function createMainUI()
         
         table.insert(ThemedElements, {
             Element = InfoDescription,
-            Properties = {TextColor3 = "TextSecondary"}
+        
+            Properties = {TextColor3 = "TextSecondary", TextKey = "version_info"}
         })
     end
     
     createInfoContent()
     
-    CloseButton.MouseButton1Click:Connect(function()
-        toggleMainUI(false)
-    end)
-    
-    MinimizeButton.MouseButton1Click:Connect(function()
-        toggleMainUI(false)
-    end)
+    local internalToggleFunction = function(visible)
+        local targetPos = visible and UDim2.new(0.5, -400, 0.5, -250) or UDim2.new(0.5, -400, 1.2, -250)
+        local tweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+        safeTween(MainFrame, tweenInfo, {Position = targetPos})
+        HubState.Visible = visible
+    end
+
+    CloseButton.MouseButton1Click:Connect(function() internalToggleFunction(false) end)
+    MinimizeButton.MouseButton1Click:Connect(function() internalToggleFunction(false) end)
     
     applyTheme(HubState.CurrentTheme)
     applyLanguage(HubState.CurrentLanguage)
     
     switchTab("Dashboard")
     
-    return ScreenGui, function(visible)
-        local targetPos = visible and UDim2.new(0.5, -400, 0.5, -250) or UDim2.new(0.5, -400, 1.2, -250)
-        local tweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-        safeTween(MainFrame, tweenInfo, {Position = targetPos})
-        HubState.Visible = visible
-    end
-end
-
-function toggleMainUI(visible)
-    -- Implementation for toggle if needed
+    return ScreenGui, internalToggleFunction
 end
 
 local function createLoginUI()
+    if playerGui:FindFirstChild("HubLogin") then return end -- Prevent multiple login screens
+
     local LoginGui = Instance.new("ScreenGui")
     LoginGui.Name = "HubLogin"
     LoginGui.ResetOnSpawn = false
     LoginGui.Parent = playerGui
     
+ 
     local LoginFrame = Instance.new("Frame")
     LoginFrame.Size = UDim2.new(0, 400, 0, 300)
     LoginFrame.Position = UDim2.new(0.5, -200, -0.5, -150)
@@ -2249,6 +2579,7 @@ local function createLoginUI()
     
     local LoginGradient = Instance.new("UIGradient")
     LoginGradient.Color = ColorSequence.new{
+  
         ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 110, 255)),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 25))
     }
@@ -2307,7 +2638,7 @@ local function createLoginUI()
     local PasswordCorner = Instance.new("UICorner")
     PasswordCorner.CornerRadius = UDim.new(0, 8)
     PasswordCorner.Parent = PasswordBox
-    
+   
     local PasswordPadding = Instance.new("UIPadding")
     PasswordPadding.PaddingLeft = UDim.new(0, 15)
     PasswordPadding.Parent = PasswordBox
@@ -2322,6 +2653,7 @@ local function createLoginUI()
     LoginButton.Font = Enum.Font.GothamBold
     LoginButton.TextSize = 18
     LoginButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ 
     LoginButton.Parent = LoginFrame
     
     local LoginButtonCorner = Instance.new("UICorner")
@@ -2348,11 +2680,12 @@ local function createLoginUI()
     LoginButton.MouseLeave:Connect(function()
         safeTween(LoginButton, TweenInfo.new(0.2), {
             BackgroundTransparency = 0.1,
+           
             Size = UDim2.new(0.6, 0, 0, 45)
         })
     end)
     
-    LoginButton.MouseButton1Click:Connect(function()
+    local function attemptLogin()
         local username = UsernameBox.Text
         local password = PasswordBox.Text
         
@@ -2366,6 +2699,7 @@ local function createLoginUI()
         local isValid = false
         for _, cred in ipairs(validCredentials) do
             if username == cred.user and password == cred.pass then
+     
                 isValid = true
                 break
             end
@@ -2379,11 +2713,11 @@ local function createLoginUI()
                 Position = UDim2.new(0.5, -200, 1.5, -150),
                 Rotation = 5
             })
-            
+  
             safeWait(0.6)
             LoginGui:Destroy()
             
-            local hubGui, toggleHub = createMainUI()
+            hubGui, toggleHub = createMainUI()
             hubGui.Parent = playerGui
             toggleHub(true)
             
@@ -2395,19 +2729,23 @@ local function createLoginUI()
             local originalPos = LoginFrame.Position
             for i = 1, 6 do
                 LoginFrame.Position = originalPos + UDim2.new(0, math.random(-8, 8), 0, math.random(-3, 3))
+             
                 safeWait(0.05)
             end
             LoginFrame.Position = originalPos
         end
-    end)
+    end
+
+    LoginButton.MouseButton1Click:Connect(attemptLogin)
     
     PasswordBox.FocusLost:Connect(function(enterPressed)
         if enterPressed then
-            LoginButton.MouseButton1Click:Fire()
+            attemptLogin()
         end
     end)
     
     safeTween(LoginFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+     
         Position = UDim2.new(0.5, -200, 0.5, -150)
     })
 end
@@ -2436,7 +2774,8 @@ function showNotification(message, notificationType)
     local notification = Instance.new("Frame")
     notification.Size = UDim2.new(1, 0, 0, 60)
     local color = notificationType == "success" and Color3.fromRGB(100, 200, 100) or
-                  notificationType == "error" and Color3.fromRGB(200, 100, 100) or
+      
+                notificationType == "error" and Color3.fromRGB(200, 100, 100) or
                   Color3.fromRGB(100, 150, 200)
     notification.BackgroundColor3 = color
     notification.BackgroundTransparency = 0.1
@@ -2448,6 +2787,7 @@ function showNotification(message, notificationType)
     notifCorner.Parent = notification
     
     local notifText = Instance.new("TextLabel")
+  
     notifText.Size = UDim2.new(1, -20, 1, 0)
     notifText.Position = UDim2.new(0, 10, 0, 0)
     notifText.BackgroundTransparency = 1
@@ -2471,6 +2811,7 @@ function showNotification(message, notificationType)
                 Position = UDim2.new(1, 0, 0, 0),
                 BackgroundTransparency = 1
             })
+   
             safeWait(0.3)
             notification:Destroy()
         end
@@ -2481,31 +2822,33 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
     if input.KeyCode == Enum.KeyCode.RightControl then
-        if HubState.Visible then
-            pcall(function()
-                local hubGui = playerGui:FindFirstChild("UltimateHub")
-                if hubGui then
-                    local mainFrame = hubGui:FindFirstChild("MainContainer")
-                    if mainFrame then
-                        safeTween(mainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                            Position = UDim2.new(0.5, -400, 1.2, -250)
-                        })
-                        HubState.Visible = false
-                    end
-                end
-            end)
-        else
+        if toggleHub then
+            toggleHub(not HubState.Visible)
+        elseif not playerGui:FindFirstChild("HubLogin") then
             createLoginUI()
         end
     elseif input.KeyCode == Enum.KeyCode.F1 then
         pcall(function()
             for _, gui in ipairs(playerGui:GetChildren()) do
-                if gui.Name:find("Hub") or gui.Name:find("Ultimate") or gui.Name:find("0_0") then
+                if gui.Name:find("Hub") or gui.Name:find("Ultimate") or gui.Name:find("0_0") or gui.Name:find("AnimeVisualsGUI") then
                     gui:Destroy()
                 end
             end
             showNotification("Emergency hide activated", "info")
         end)
+    elseif input.KeyCode == Enum.KeyCode.F2 then
+        if #HubState.ScriptHistory > 0 then
+            local lastScriptName = HubState.ScriptHistory[#HubState.ScriptHistory]
+            for _, script in ipairs(ScriptLibrary) do
+                if script.name == lastScriptName then
+                    safeExecute(script.func, script.name)
+                    showNotification("Quick-executed: " .. (Languages[HubState.CurrentLanguage][script.name] or script.name), "info")
+                    break
+                end
+            end
+        else
+            showNotification("No script in history to execute.", "error")
+        end
     end
 end)
 
@@ -2513,6 +2856,7 @@ local sounds = {
     success = createSound("rbxasset://sounds/electronicpingshort.wav", 0.4),
     error = createSound("rbxasset://sounds/impact_water.mp3", 0.3),
     click = createSound("rbxasset://sounds/button-09.mp3", 0.2),
+ 
     notification = createSound("rbxasset://sounds/notify.mp3", 0.3)
 }
 
@@ -2531,14 +2875,17 @@ spawn(function()
             for _, gui in ipairs(playerGui:GetChildren()) do
                 if gui:FindFirstChild("Particles") then
                     local particles = gui.Particles:GetChildren()
+             
                     if #particles > 25 then
                         for i = 1, 10 do
                             if particles[i] then
+                              
                                 particles[i]:Destroy()
                             end
                         end
                     end
                 end
+          
             end
         end)
         
@@ -2552,6 +2899,7 @@ end)
 
 spawn(function()
     while safeWait(30) do
+      
         pcall(function()
             for _, gui in ipairs(playerGui:GetChildren()) do
                 if gui.Name:find("Hub") then
@@ -2559,15 +2907,13 @@ spawn(function()
                 end
             end
         end)
+  
     end
 end)
 
 local function safeExecute(func, name)
     local success, err = pcall(func)
-    if success then
-        showNotification((Languages[HubState.CurrentLanguage].script_executed or "Script executed successfully") .. ": " .. name, "success")
-        pcall(function() sounds.success:Play() end)
-    else
+    if not success then
         showNotification((Languages[HubState.CurrentLanguage].error_occurred or "An error occurred") .. ": " .. tostring(err), "error")
         pcall(function() sounds.error:Play() end)
     end
@@ -2609,6 +2955,7 @@ spawn(function()
         pcall(function()
             for _, gui in ipairs(playerGui:GetChildren()) do
                 local particles = gui:FindFirstChild("Particles")
+  
                 if particles and #particles:GetChildren() > 30 then
                     for i = 1, 10 do
                         local child = particles:GetChildren()[1]
@@ -2624,8 +2971,8 @@ end)
 
 print("🚀 0_0 Hub Ultimate Edition V2.2 Updated (2025) Loaded Successfully!")
 print("📋 New: Jump Boost, Teleport, Aimbot, Fullbright, Remove Fog")
-print("🔧 Fixes: Day/Night, Anime Visuals (less blur), God Mode (regen)")
+print("🔧 Fixes: Day/Night, Anime Visuals (UI), God Mode (regen), Advanced ESP")
 print("🎮 Press RightControl to open the hub")
-print("🔧 Emergency hide: F1")
-print("💎 Enjoy your premium gaming experience!")
+print("🔧 Emergency hide: F1 | Quick Execute: F2")
+print("💎 Enjoy your gaming experience!")
 print("🔍 Compatible with:", currentExecutor, "executor")
