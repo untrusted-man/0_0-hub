@@ -126,7 +126,7 @@ local Languages = {
         category_fun = "Fun & Games",
         anime_visuals = "🌸 Anime Visuals UI",
         
-        day_night_cycle = "☀️ Dynamic Day/Night",
+        day_night_cycle = "☀️ Day/Night UI",
         infinite_yield = "⚡ Infinite Yield",
         esp_advanced = "👁️ Advanced ESP",
         fly_script = "🚀 Enhanced Fly",
@@ -773,22 +773,171 @@ local ScriptLibrary = {
         name = "day_night_cycle",
         category = "visuals",
         premium = false,
-        description = "Dynamic day/night cycle with smooth transitions",
+        description = "Opens a UI to control the time of day.",
  
         func = function()
-            if getgenv().DayNightCycleActive then
-                getgenv().DayNightCycleActive = false
-                showNotification("Dynamic Day/Night cycle disabled!", "info")
-            else
-                getgenv().DayNightCycleActive = true
-                showNotification("Dynamic Day/Night cycle enabled!", "success")
-                spawn(function()
-                    while getgenv().DayNightCycleActive do
-                        Lighting.ClockTime = Lighting.ClockTime + 0.01
-                        task.wait()
-                    end
-                end)
+            if playerGui:FindFirstChild("DayNightUI") then
+                playerGui:FindFirstChild("DayNightUI"):Destroy()
             end
+
+            local Players = game:GetService("Players")
+            local player = Players.LocalPlayer
+            local playerGui = player:WaitForChild("PlayerGui")
+            local Lighting = game:GetService("Lighting")
+            local UserInputService = game:GetService("UserInputService")
+            
+            local screenGui = Instance.new("ScreenGui")
+            screenGui.Name = "DayNightUI"
+            screenGui.ResetOnSpawn = false
+            screenGui.Parent = playerGui
+            
+            local mainFrame = Instance.new("Frame")
+            mainFrame.Size = UDim2.new(0,300,0,180)
+            mainFrame.Position = UDim2.new(0.5,-150,0.8,-90)
+            mainFrame.AnchorPoint = Vector2.new(0.5,0.5)
+            mainFrame.BackgroundColor3 = Color3.fromRGB(28,28,30)
+            mainFrame.BorderSizePixel = 0
+            mainFrame.Active = true
+            mainFrame.Parent = screenGui
+            
+            local uiCorner = Instance.new("UICorner", mainFrame)
+            uiCorner.CornerRadius = UDim.new(0,12)
+            
+            local title = Instance.new("TextLabel", mainFrame)
+            title.Size = UDim2.new(1, -60,0,36)
+            title.Position = UDim2.new(0,16,0,8)
+            title.BackgroundTransparency = 1
+            title.Text = "Day/Night UI"
+            title.Font = Enum.Font.GothamBold
+            title.TextSize = 20
+            title.TextColor3 = Color3.fromRGB(235,235,235)
+            title.TextXAlignment = Enum.TextXAlignment.Left
+            
+            local minBtn = Instance.new("TextButton", mainFrame)
+            minBtn.Size = UDim2.new(0,28,0,28)
+            minBtn.Position = UDim2.new(1,-44,0,8)
+            minBtn.Text = "—"
+            minBtn.Font = Enum.Font.GothamBold
+            minBtn.TextSize = 18
+            minBtn.TextColor3 = Color3.fromRGB(255,255,255)
+            minBtn.BackgroundColor3 = Color3.fromRGB(64,64,64)
+            minBtn.BorderSizePixel = 0
+            minBtn.AutoButtonColor = true
+            local minCorner = Instance.new("UICorner", minBtn)
+            minCorner.CornerRadius = UDim.new(0,6)
+            
+            local sliderFrame = Instance.new("Frame", mainFrame)
+            sliderFrame.Size = UDim2.new(0,260,0,20)
+            sliderFrame.Position = UDim2.new(0,20,0,60)
+            sliderFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
+            sliderFrame.BorderSizePixel = 0
+            local sliderCorner = Instance.new("UICorner", sliderFrame)
+            sliderCorner.CornerRadius = UDim.new(0,10)
+            
+            local knob = Instance.new("Frame", sliderFrame)
+            knob.Size = UDim2.new(0,20,1,0)
+            knob.Position = UDim2.new(0,0,0,0)
+            knob.BackgroundColor3 = Color3.fromRGB(255,200,50)
+            knob.BorderSizePixel = 0
+            local knobCorner = Instance.new("UICorner", knob)
+            knobCorner.CornerRadius = UDim.new(0,10)
+            
+            local timeLabel = Instance.new("TextLabel", mainFrame)
+            timeLabel.Size = UDim2.new(1,0,0,24)
+            timeLabel.Position = UDim2.new(0,0,0,100)
+            timeLabel.BackgroundTransparency = 1
+            timeLabel.Text = "Time: 12:00"
+            timeLabel.Font = Enum.Font.Gotham
+            timeLabel.TextSize = 18
+            timeLabel.TextColor3 = Color3.fromRGB(235,235,235)
+            timeLabel.TextXAlignment = Enum.TextXAlignment.Center
+            
+            local function makeBtn(text,posX)
+                local btn = Instance.new("TextButton", mainFrame)
+                btn.Size = UDim2.new(0,60,0,30)
+                btn.Position = UDim2.new(0,posX,0,140)
+                btn.BackgroundColor3 = Color3.fromRGB(100,150,255)
+                btn.Text = text
+                btn.Font = Enum.Font.GothamBold
+                btn.TextSize = 16
+                btn.TextColor3 = Color3.fromRGB(255,255,255)
+                local corner = Instance.new("UICorner", btn)
+                corner.CornerRadius = UDim.new(0,8)
+                return btn
+            end
+            
+            local dayBtn = makeBtn("Day", 80)
+            local nightBtn = makeBtn("Night", 160)
+            
+            local function updateLighting(timeOfDay)
+                Lighting.ClockTime = timeOfDay
+                local hours = math.floor(timeOfDay)
+                local minutes = math.floor((timeOfDay - hours)*60)
+                timeLabel.Text = string.format("Time: %02d:%02d", hours, minutes)
+            end
+            
+            local draggingKnob = false
+            knob.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingKnob = true end end)
+            knob.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingKnob = false end end)
+            
+            UserInputService.InputChanged:Connect(function(input)
+                if draggingKnob and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    local knobWidth = knob.AbsoluteSize.X
+                    local posX = math.clamp(input.Position.X - sliderFrame.AbsolutePosition.X, 0, sliderFrame.AbsoluteSize.X)
+                    knob.Position = UDim2.new(0, posX - knobWidth/2, 0, 0)
+                    updateLighting((posX / sliderFrame.AbsoluteSize.X) * 24)
+                end
+            end)
+            
+            dayBtn.MouseButton1Click:Connect(function()
+                knob.Position = UDim2.new(0.5, -knob.AbsoluteSize.X/2, 0, 0)
+                updateLighting(12)
+            end)
+            nightBtn.MouseButton1Click:Connect(function()
+                knob.Position = UDim2.new(0,0,0,0)
+                updateLighting(0)
+            end)
+            
+            local collapsed = Instance.new("TextButton", screenGui)
+            collapsed.Size = UDim2.new(0,140,0,44)
+            collapsed.Position = UDim2.new(0,12,1,-64)
+            collapsed.Text = "Day/Night UI"
+            collapsed.Font = Enum.Font.GothamBold
+            collapsed.TextSize = 18
+            collapsed.TextColor3 = Color3.fromRGB(255,255,255)
+            collapsed.BackgroundColor3 = Color3.fromRGB(48,48,50)
+            collapsed.Visible = false
+            local colCorner = Instance.new("UICorner", collapsed)
+            colCorner.CornerRadius = UDim.new(0,10)
+            
+            minBtn.MouseButton1Click:Connect(function()
+                mainFrame.Visible = false
+                collapsed.Visible = true
+            end)
+            collapsed.MouseButton1Click:Connect(function()
+                mainFrame.Visible = true
+                collapsed.Visible = false
+            end)
+            
+            local draggingFrame = false
+            local dragInput, dragStart, startPos
+            
+            mainFrame.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    if not (input.Target:IsDescendantOf(sliderFrame) or input.Target == knob or input.Target == minBtn) then
+                        draggingFrame = true
+                        dragStart = input.Position
+                        startPos = mainFrame.Position
+                        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then draggingFrame=false end end)
+                    end
+                end
+            end)
+            
+            mainFrame.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
+            UserInputService.InputChanged:Connect(function(input) if draggingFrame and dragInput and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then local delta = input.Position - dragStart; mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
+            
+            updateLighting(12)
+            knob.Position = UDim2.new(0.5, -knob.AbsoluteSize.X/2, 0, 0)
         end
     },
     {
@@ -1019,17 +1168,19 @@ local ScriptLibrary = {
         name = "aimbot",
         category = "combat",
         premium = false,
-        description = "Simple aimbot. Press Q to toggle on/off.",
+        description = "Aimbot with Q toggle. Click again to disable.",
         func = function()
-            if getgenv().aimbotToggleConnection then
-                getgenv().aimbotToggleConnection:Disconnect()
+            if getgenv().aimbotActive then
+                getgenv().aimbotActive = false
+                if getgenv().aimbotToggleConnection then getgenv().aimbotToggleConnection:Disconnect() end
+                if getgenv().aimbotHeartbeatConnection then getgenv().aimbotHeartbeatConnection:Disconnect() end
                 getgenv().aimbotToggleConnection = nil
-            end
-            if getgenv().aimbotHeartbeatConnection then
-                getgenv().aimbotHeartbeatConnection:Disconnect()
                 getgenv().aimbotHeartbeatConnection = nil
+                showNotification("Aimbot system deactivated.", "info")
+                return
             end
-
+    
+            getgenv().aimbotActive = true
             local aimbotEnabled = true
             
             local function getNearestEnemy()
@@ -1038,12 +1189,12 @@ local ScriptLibrary = {
                 if not char then return nil end
                 local root = char:FindFirstChild("HumanoidRootPart")
                 if not root then return nil end
-
+                
                 for _, plr in pairs(Players:GetPlayers()) do
-                    if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
+                    if plr ~= player and plr.Team ~= player.Team and plr.Character and plr.Character:FindFirstChild("Head") and plr.Character:FindFirstChildOfClass("Humanoid") and plr.Character.Humanoid.Health > 0 then
                         local head = plr.Character.Head
                         local d = (head.Position - root.Position).Magnitude
-                        if d < dist and d > 0.1 then
+                        if d < dist then
                             dist = d
                             nearest = head
                         end
@@ -1053,27 +1204,24 @@ local ScriptLibrary = {
             end
             
             getgenv().aimbotHeartbeatConnection = RunService.Heartbeat:Connect(function()
-                if not aimbotEnabled or not mouse then return end
+                if not aimbotEnabled or not getgenv().aimbotActive or not mouse then return end
                 local target = getNearestEnemy()
-                if target and typeof(mouse.Hit) == "CFrame" then
+                if target and typeof(workspace.CurrentCamera.CFrame) == "CFrame" then
                     local targetPos = target.Position
                     local cameraPos = workspace.CurrentCamera.CFrame.Position
-                    local direction = (targetPos - cameraPos).Unit
-                    workspace.CurrentCamera.CFrame = CFrame.new(cameraPos, cameraPos + direction)
+                    workspace.CurrentCamera.CFrame = CFrame.lookAt(cameraPos, targetPos)
                 end
             end)
-            table.insert(HubState.Connections, getgenv().aimbotHeartbeatConnection)
-
+            
             getgenv().aimbotToggleConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 if gameProcessed then return end
                 if input.KeyCode == Enum.KeyCode.Q then
                     aimbotEnabled = not aimbotEnabled
-                    showNotification("Aimbot " .. (aimbotEnabled and "Enabled" or "Disabled"), "info")
+                    showNotification("Aimbot " .. (aimbotEnabled and "ON" or "OFF"), "info")
                 end
             end)
-            table.insert(HubState.Connections, getgenv().aimbotToggleConnection)
             
-            showNotification("Simple Aimbot enabled! Press Q to toggle.", "success")
+            showNotification("Aimbot system activated! Press Q to toggle.", "success")
         end
     },
     {
@@ -2830,7 +2978,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     elseif input.KeyCode == Enum.KeyCode.F1 then
         pcall(function()
             for _, gui in ipairs(playerGui:GetChildren()) do
-                if gui.Name:find("Hub") or gui.Name:find("Ultimate") or gui.Name:find("0_0") or gui.Name:find("AnimeVisualsGUI") then
+                if gui.Name:find("Hub") or gui.Name:find("Ultimate") or gui.Name:find("0_0") or gui.Name:find("AnimeVisualsGUI") or gui.Name:find("DayNightUI") then
                     gui:Destroy()
                 end
             end
