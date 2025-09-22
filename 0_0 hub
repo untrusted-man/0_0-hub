@@ -3058,6 +3058,98 @@ spawn(function()
   
     end
 end)
+-- Patched version of your 0_0 Hub with Precision Aim added
+
+-- ... (all your existing code above remains unchanged)
+
+--// Enhanced Script Library - Expanded and Fixed
+local ScriptLibrary = {
+    {
+        name = "anime_visuals",
+        category = "visuals",
+        premium = false,
+        description = "Anime-style visuals with a UI for customization",
+        func = function()
+            -- existing code ...
+        end
+    },
+    {
+        name = "day_night_cycle",
+        category = "visuals",
+        premium = false,
+        description = "Opens a UI to control the time of day.",
+        func = function()
+            -- existing code ...
+        end
+    },
+    -- ... other scripts ...
+    {
+        name = "aimbot",
+        category = "combat",
+        premium = false,
+        description = "Aimbot with Q toggle. Click again to disable.",
+        func = function()
+            -- existing aimbot code ...
+        end
+    },
+    {
+        name = "precision_aim",
+        category = "combat",
+        premium = false,
+        description = "🎯 Precision Aim (toggle with E)",
+        func = function()
+            local player = game.Players.LocalPlayer
+            local mouse = player:GetMouse()
+            local Aiming = false
+
+            function AimLock()
+                local target
+                local lastMagnitude = math.huge
+                for _, v in pairs(game.Players:GetPlayers()) do
+                    if v ~= player and v.Character and v.Character.PrimaryPart then
+                        local charPos = v.Character.PrimaryPart.Position
+                        local mousePos = mouse.Hit.p
+                        if (charPos - mousePos).Magnitude < lastMagnitude then
+                            lastMagnitude = (charPos - mousePos).Magnitude
+                            target = v
+                        end
+                    end
+                end
+                if target and target.Character and target.Character.PrimaryPart then
+                    local charPos = target.Character.PrimaryPart.Position
+                    local cam = workspace.CurrentCamera
+                    local pos = cam.CFrame.Position
+                    workspace.CurrentCamera.CFrame = CFrame.new(pos, charPos)
+                end
+            end
+
+            local UserInputService = game:GetService("UserInputService")
+            UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                if not gameProcessed and input.KeyCode == Enum.KeyCode.E then
+                    Aiming = not Aiming
+                end
+            end)
+
+            game:GetService("RunService").RenderStepped:Connect(function()
+                if Aiming then AimLock() end
+            end)
+
+            showNotification("Precision Aim loaded! Toggle with E.", "success")
+        end
+    },
+    {
+        name = "fullbright",
+        category = "visuals",
+        premium = false,
+        description = "Make the game fully bright",
+        func = function()
+            -- existing fullbright code ...
+        end
+    },
+    -- ... rest of your ScriptLibrary ...
+}
+
+-- ... (rest of your hub code continues unchanged)
 
 local function safeExecute(func, name)
     local success, err = pcall(func)
