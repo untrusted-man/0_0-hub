@@ -1,11 +1,11 @@
 --//==========================================================================================================//--
---//                                                                                                          //--
+--//                                                                                                    //--
 --//                         0_0 Hub V2.3.4 - Final Hotfix (Updated September 25, 2025)                         //--
---//                                                                                                          //--
---//      This patch addresses the final remaining runtime errors for a stable experience.                    //--
---//      [FIXED] "toHex is not a valid member of Color3" error in AI chat by implementing a custom converter. //--
---//      [FIXED] "collectgarbage must be called with 'count'" error by updating to modern Luau syntax.       //--
---//                                                                                                          //--
+--//                                                                                                    //--
+--//      This patch addresses the final remaining runtime errors for a stable experience.              //--
+--//      [FIXED] "toHex is not a valid member of Color3" error in AI chat by implementing a custom converter.      //--
+--//      [FIXED] "collectgarbage must be called with 'count'" error by updating to modern Luau syntax.        //--
+--//                                                                                                    //--
 --//==========================================================================================================//--
 
 
@@ -76,6 +76,7 @@ local HubState = {
     StartPos = nil,
     Particles = {},
     Connections = {},
+    ESP_Connections = {}, -- [FIX] Isolate ESP connections to prevent conflicts
     Notifications = {},
     Hotkeys = {},
     ScriptHistory = {},
@@ -92,7 +93,7 @@ local HubState = {
 --// Enhanced Localization System (8 Languages) - Updated with new keys for v2.3
 local Languages = {
     en = {
-        hub_title = "0_0 Hub AI Revolution",
+        hub_title = "0_0 Hub", -- [FIX] Shortened title to prevent UI overlap
         dashboard_tab = "Dashboard",
         scripts_tab = "Scripts",
         ai_assistant_tab = "AI Assistant", -- New Tab
@@ -153,7 +154,7 @@ local Languages = {
         version_info = "Hub Version: 2.3.4 AI Revolution\nLast Updated: September 25, 2025\n\nThis is a massive overhaul featuring a new AI Assistant and a completely redesigned user interface." -- Updated
     },
     es = {
-        hub_title = "Centro 0_0 Revolución AI",
+        hub_title = "Centro 0_0", -- [FIX] Shortened title
         dashboard_tab = "Panel",
         scripts_tab = "Scripts",
         ai_assistant_tab = "Asistente IA",
@@ -170,7 +171,7 @@ local Languages = {
         teleport_to_player = "📍 Teleportar a Jugador"
     },
     fr = {
-        hub_title = "Centre 0_0 Révolution IA",
+        hub_title = "Centre 0_0", -- [FIX] Shortened title
         dashboard_tab = "Tableau de bord",
         scripts_tab = "Scripts",
         ai_assistant_tab = "Assistant IA",
@@ -187,7 +188,7 @@ local Languages = {
         teleport_to_player = "📍 Téléporter vers le Joueur"
     },
     de = {
-        hub_title = "0_0 Hub KI-Revolution",
+        hub_title = "0_0 Hub", -- [FIX] Shortened title
         dashboard_tab = "Dashboard",
         scripts_tab = "Skripte",
         ai_assistant_tab = "KI-Assistent",
@@ -204,7 +205,7 @@ local Languages = {
         teleport_to_player = "📍 Zu Spieler Teleportieren"
     },
     pt = {
-        hub_title = "Centro 0_0 Revolução IA",
+        hub_title = "Centro 0_0", -- [FIX] Shortened title
         dashboard_tab = "Painel",
         scripts_tab = "Scripts",
         ai_assistant_tab = "Assistente de IA",
@@ -221,7 +222,7 @@ local Languages = {
         teleport_to_player = "📍 Teleportar para Jogador"
     },
     ru = {
-        hub_title = "Центр 0_0 ИИ Революция",
+        hub_title = "Центр 0_0", -- [FIX] Shortened title
         dashboard_tab = "Панель",
         scripts_tab = "Скрипты",
         ai_assistant_tab = "ИИ-Помощник",
@@ -238,7 +239,7 @@ local Languages = {
         teleport_to_player = "📍 Телепорт к Игроку"
     },
     ja = {
-        hub_title = "0_0 ハブ AI革命",
+        hub_title = "0_0 ハブ", -- [FIX] Shortened title
         dashboard_tab = "ダッシュボード",
         scripts_tab = "スクリプト",
         ai_assistant_tab = "AIアシスタント",
@@ -255,7 +256,7 @@ local Languages = {
         teleport_to_player = "📍 プレイヤーへテレポート"
     },
     ko = {
-        hub_title = "0_0 허브 AI 혁명",
+        hub_title = "0_0 허브", -- [FIX] Shortened title
         dashboard_tab = "대시보드",
         scripts_tab = "스크립트",
         ai_assistant_tab = "AI 어시스턴트",
@@ -719,23 +720,29 @@ local ScriptLibrary = {
             local screenGui = Instance.new("ScreenGui", playerGui)
             screenGui.Name = "DayNightUI"; screenGui.ResetOnSpawn = false
             local mainFrame = Instance.new("Frame", screenGui)
-            mainFrame.Size = UDim2.new(0,300,0,180); mainFrame.Position = UDim2.new(0.5,-150,0.8,-90); mainFrame.AnchorPoint = Vector2.new(0.5,0.5); mainFrame.BackgroundColor3 = Color3.fromRGB(28,28,30); mainFrame.BorderSizePixel = 0; mainFrame.Active = true
+            mainFrame.Size = UDim2.new(0,300,0,180); mainFrame.Position = UDim2.new(0.5,-150,0.8,-90); mainFrame.AnchorPoint = Vector2.new(0.5,0.5); mainFrame.BackgroundColor3 = Color3.fromRGB(28,28,30); mainFrame.BorderSizePixel = 0;
+            mainFrame.Active = true
             Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0,12)
             local title = Instance.new("TextLabel", mainFrame)
-            title.Size = UDim2.new(1, -60,0,36); title.Position = UDim2.new(0,16,0,8); title.BackgroundTransparency = 1; title.Text = "Day/Night UI"; title.Font = Enum.Font.GothamBold; title.TextSize = 20; title.TextColor3 = Color3.fromRGB(235,235,235); title.TextXAlignment = Enum.TextXAlignment.Left
+            title.Size = UDim2.new(1, -60,0,36); title.Position = UDim2.new(0,16,0,8); title.BackgroundTransparency = 1; title.Text = "Day/Night UI"; title.Font = Enum.Font.GothamBold; title.TextSize = 20; title.TextColor3 = Color3.fromRGB(235,235,235);
+            title.TextXAlignment = Enum.TextXAlignment.Left
             local minBtn = Instance.new("TextButton", mainFrame)
-            minBtn.Size = UDim2.new(0,28,0,28); minBtn.Position = UDim2.new(1,-44,0,8); minBtn.Text = "—"; minBtn.Font = Enum.Font.GothamBold; minBtn.TextSize = 18; minBtn.TextColor3 = Color3.fromRGB(255,255,255); minBtn.BackgroundColor3 = Color3.fromRGB(64,64,64); Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0,6)
+            minBtn.Size = UDim2.new(0,28,0,28); minBtn.Position = UDim2.new(1,-44,0,8); minBtn.Text = "—"; minBtn.Font = Enum.Font.GothamBold; minBtn.TextSize = 18; minBtn.TextColor3 = Color3.fromRGB(255,255,255); minBtn.BackgroundColor3 = Color3.fromRGB(64,64,64);
+            Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0,6)
             local sliderFrame = Instance.new("Frame", mainFrame)
             sliderFrame.Size = UDim2.new(0,260,0,20); sliderFrame.Position = UDim2.new(0,20,0,60); sliderFrame.BackgroundColor3 = Color3.fromRGB(50,50,50); Instance.new("UICorner", sliderFrame).CornerRadius = UDim.new(0,10)
             local knob = Instance.new("Frame", sliderFrame)
             knob.Size = UDim2.new(0,20,1,0); knob.BackgroundColor3 = Color3.fromRGB(255,200,50); Instance.new("UICorner", knob).CornerRadius = UDim.new(0,10)
             local timeLabel = Instance.new("TextLabel", mainFrame)
-            timeLabel.Size = UDim2.new(1,0,0,24); timeLabel.Position = UDim2.new(0,0,0,100); timeLabel.BackgroundTransparency = 1; timeLabel.Text = "Time: 12:00"; timeLabel.Font = Enum.Font.Gotham; timeLabel.TextSize = 18; timeLabel.TextColor3 = Color3.fromRGB(235,235,235); timeLabel.TextXAlignment = Enum.TextXAlignment.Center
-            local function makeBtn(text,posX) local btn = Instance.new("TextButton", mainFrame); btn.Size = UDim2.new(0,60,0,30); btn.Position = UDim2.new(0,posX,0,140); btn.BackgroundColor3 = Color3.fromRGB(100,150,255); btn.Text = text; btn.Font = Enum.Font.GothamBold; btn.TextSize = 16; btn.TextColor3 = Color3.fromRGB(255,255,255); Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8); return btn end
+            timeLabel.Size = UDim2.new(1,0,0,24); timeLabel.Position = UDim2.new(0,0,0,100); timeLabel.BackgroundTransparency = 1; timeLabel.Text = "Time: 12:00"; timeLabel.Font = Enum.Font.Gotham; timeLabel.TextSize = 18; timeLabel.TextColor3 = Color3.fromRGB(235,235,235);
+            timeLabel.TextXAlignment = Enum.TextXAlignment.Center
+            local function makeBtn(text,posX) local btn = Instance.new("TextButton", mainFrame); btn.Size = UDim2.new(0,60,0,30); btn.Position = UDim2.new(0,posX,0,140); btn.BackgroundColor3 = Color3.fromRGB(100,150,255); btn.Text = text; btn.Font = Enum.Font.GothamBold; btn.TextSize = 16;
+            btn.TextColor3 = Color3.fromRGB(255,255,255); Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8); return btn end
             local dayBtn, nightBtn = makeBtn("Day", 80), makeBtn("Night", 160)
             local function updateLighting(timeOfDay) Lighting.ClockTime = timeOfDay; timeLabel.Text = string.format("Time: %02d:%02d", math.floor(timeOfDay), math.floor((timeOfDay - math.floor(timeOfDay))*60)) end
             local draggingKnob = false
-            knob.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then draggingKnob = true end end); knob.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then draggingKnob = false end end)
+            knob.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then draggingKnob = true end end);
+            knob.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then draggingKnob = false end end)
             UserInputService.InputChanged:Connect(function(i) if draggingKnob and i.UserInputType == Enum.UserInputType.MouseMovement then local p = math.clamp(i.Position.X - sliderFrame.AbsolutePosition.X, 0, sliderFrame.AbsoluteSize.X); knob.Position = UDim2.new(0, p - knob.AbsoluteSize.X/2, 0, 0); updateLighting((p / sliderFrame.AbsoluteSize.X) * 24) end end)
             dayBtn.MouseButton1Click:Connect(function() knob.Position = UDim2.new(0.5, -knob.AbsoluteSize.X/2, 0, 0); updateLighting(12) end)
             nightBtn.MouseButton1Click:Connect(function() knob.Position = UDim2.new(0,0,0,0); updateLighting(0) end)
@@ -764,16 +771,39 @@ local ScriptLibrary = {
         category = "movement",
         premium = false,
         description = "Enhanced fly script with speed controls",
+        -- [FIX] Complete rewrite of fly script for full movement control and stability.
         func = function()
+            -- Check if the system is already active; if so, deactivate it completely.
+            if getgenv().FlySystemActive_00Hub then
+                if getgenv().FlyToggleConnection_00Hub then getgenv().FlyToggleConnection_00Hub:Disconnect() end
+                if getgenv().FlyInstance_00Hub and getgenv().FlyInstance_00Hub.stop then getgenv().FlyInstance_00Hub.stop() end
+                getgenv().FlySystemActive_00Hub = nil
+                getgenv().FlyToggleConnection_00Hub = nil
+                getgenv().FlyInstance_00Hub = nil
+                showNotification("Fly script system completely disabled.", "info")
+                return
+            end
+
             local flying = false
             local speed = 50
-            local bodyVelocity, bodyAngularVelocity
-            
+            local bodyVelocity, bodyAngularVelocity, flyUpdateConnection
+
+            local function stopFly()
+                flying = false
+                if bodyVelocity then bodyVelocity:Destroy() end
+                if bodyAngularVelocity then bodyAngularVelocity:Destroy() end
+                if flyUpdateConnection then flyUpdateConnection:Disconnect() end
+                bodyVelocity, bodyAngularVelocity, flyUpdateConnection = nil, nil, nil
+            end
+
             local function startFly()
+                if flying then return end
                 local char = player.Character
                 if not char or not char:FindFirstChild("HumanoidRootPart") then return end
                 local humanoidRootPart = char.HumanoidRootPart
                 
+                stopFly() -- Clean up any previous instances just in case
+
                 bodyVelocity = Instance.new("BodyVelocity")
                 bodyAngularVelocity = Instance.new("BodyAngularVelocity")
                 
@@ -786,13 +816,28 @@ local ScriptLibrary = {
                 bodyAngularVelocity.Parent = humanoidRootPart
                 
                 flying = true
+
+                flyUpdateConnection = RunService.Heartbeat:Connect(function()
+                    if not flying or not bodyVelocity or not bodyVelocity.Parent then return end
+                    
+                    local moveVector = Vector3.new(0, 0, 0)
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveVector += Vector3.new(0, 0, -1) end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveVector += Vector3.new(0, 0, 1) end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveVector += Vector3.new(-1, 0, 0) end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveVector += Vector3.new(1, 0, 0) end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveVector += Vector3.new(0, 1, 0) end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveVector += Vector3.new(0, -1, 0) end
+                    
+                    if moveVector.Magnitude > 0 then
+                        local cameraCFrame = workspace.CurrentCamera.CFrame
+                        bodyVelocity.Velocity = (moveVector.Z * cameraCFrame.LookVector + moveVector.X * cameraCFrame.RightVector + moveVector.Y * Vector3.new(0,1,0)).Unit * speed
+                    else
+                        bodyVelocity.Velocity = Vector3.new(0,0,0)
+                    end
+                end)
             end
             
-            local function stopFly()
-                flying = false
-                if bodyVelocity then bodyVelocity:Destroy() end
-                if bodyAngularVelocity then bodyAngularVelocity:Destroy() end
-            end
+            getgenv().FlyInstance_00Hub = {stop = stopFly}
             
             -- Toggle with F key
             local flyConnection = UserInputService.InputBegan:Connect(function(input)
@@ -802,12 +847,16 @@ local ScriptLibrary = {
                         showNotification("Fly disabled", "info")
                     else
                         startFly()
-                        showNotification("Fly enabled - Use WASD to move", "success")
+                        showNotification("Fly enabled - Use WASD, Space, Ctrl", "success")
                     end
                 end
             end)
-    
+            
+            getgenv().FlyToggleConnection_00Hub = flyConnection
             table.insert(HubState.Connections, flyConnection)
+            
+            getgenv().FlySystemActive_00Hub = true
+            showNotification("Fly system enabled! Press F to toggle. Execute again to disable.", "success")
         end
     },
     {
@@ -883,7 +932,7 @@ local ScriptLibrary = {
         description = "Automated farming script",
         func = function()
             spawn(function()
-                while wait(1) do
+                while task.wait(1) do
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if obj:IsA("ClickDetector") then
                             fireclickdetector(obj)
@@ -903,7 +952,7 @@ local ScriptLibrary = {
             local char = player.Character
             if char then
                 spawn(function()
-                    while wait(0.1) do
+                    while task.wait(0.1) do
                         for _, part in pairs(char:GetChildren()) do
                             if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                                 part.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
@@ -1144,7 +1193,7 @@ local function safeTween(object, info, props)
         pcall(function() tween:Play() end)
         return tween
     else
-        spawn(function()
+        task.spawn(function()
             for property, value in pairs(props) do
                 pcall(function()
                     object[property] = value
@@ -1340,8 +1389,8 @@ function toggleAdvancedESP()
                     HealthFill.BorderSizePixel = 0
                     
                     humanoid.HealthChanged:Connect(function()
-                        HealthFill.Size = UDim2.new(humanoid.Health / humanoid.MaxHealth, 0, 1, 0)
                         local healthRatio = humanoid.Health / humanoid.MaxHealth
+                        HealthFill.Size = UDim2.new(healthRatio, 0, 1, 0)
                         if healthRatio > 0.5 then
                             HealthFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
                         elseif healthRatio > 0.25 then
@@ -1361,7 +1410,7 @@ function toggleAdvancedESP()
         for _, plr in ipairs(Players:GetPlayers()) do createESP(plr) end
         
         local playerAddedConnection = Players.PlayerAdded:Connect(createESP)
-        table.insert(HubState.Connections, playerAddedConnection)
+        table.insert(HubState.ESP_Connections, playerAddedConnection)
 
         local playerRemovingConnection = Players.PlayerRemoving:Connect(function(plr)
             if not workspace:FindFirstChild("ESP_Objects") then return end
@@ -1371,11 +1420,12 @@ function toggleAdvancedESP()
                 end
             end
         end)
-        table.insert(HubState.Connections, playerRemovingConnection)
+        table.insert(HubState.ESP_Connections, playerRemovingConnection)
 
         local espUpdateConnection = RunService.Heartbeat:Connect(function()
             if not HubState.ESPEnabled or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
             local localHRP = player.Character.HumanoidRootPart
+            
             if not workspace:FindFirstChild("ESP_Objects") then return end
 
             for _, obj in ipairs(workspace.ESP_Objects:GetChildren()) do
@@ -1389,34 +1439,42 @@ function toggleAdvancedESP()
                 end
             end
         end)
-        table.insert(HubState.Connections, espUpdateConnection)
+        table.insert(HubState.ESP_Connections, espUpdateConnection)
 
         showNotification("Advanced ESP enabled with health bars and distance!", "success")
     else
         local ESPFolder = workspace:FindFirstChild("ESP_Objects")
         if ESPFolder then ESPFolder:Destroy() end
-        -- Disconnect connections to prevent memory leaks
-        for i, conn in ipairs(HubState.Connections) do
+        
+        -- [FIX] Disconnect ONLY ESP-related connections to prevent breaking other scripts
+        for _, conn in ipairs(HubState.ESP_Connections) do
             if conn and conn.Connected then
                 conn:Disconnect()
             end
-            HubState.Connections[i] = nil
         end
+        HubState.ESP_Connections = {} -- Clear the table for next time
     
         showNotification("ESP disabled", "info")
     end
 end
 
 --// Performance Monitor
-spawn(function()
-    while wait(1) do
-        local deltaTime = safeWait()
-        HubState.Performance.FPS = deltaTime > 0 and math.floor(1 / deltaTime) or 60
-		pcall(function()
-			HubState.Performance.Ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
-			HubState.Performance.Memory = math.floor(game:GetService("Stats"):GetTotalMemoryUsageMb())
-		end)
-    end
+-- [FIX] Rewrote performance monitor to be more accurate and efficient using RunService.Heartbeat
+task.spawn(function()
+    local lastStatsUpdate = 0
+    RunService.Heartbeat:Connect(function(deltaTime)
+        HubState.Performance.FPS = math.floor(1 / deltaTime)
+        
+        -- Update more expensive stats only once per second
+        if tick() - lastStatsUpdate >= 1 then
+            lastStatsUpdate = tick()
+            pcall(function()
+                local statsService = game:GetService("Stats")
+                HubState.Performance.Ping = math.floor(statsService.Network.ServerStatsItem["Data Ping"]:GetValue())
+                HubState.Performance.Memory = math.floor(statsService:GetTotalMemoryUsageMb())
+            end)
+        end
+    end)
 end)
 
 --// ====================================[   V2.3 UI CREATION   ]==================================== //--
@@ -1458,8 +1516,8 @@ function createMainUI()
     ParticleContainer.BackgroundTransparency = 1
     ParticleContainer.Parent = MainFrame
     
-    spawn(function()
-        while wait(0.4) do
+    task.spawn(function()
+        while task.wait(0.4) do
             if #ParticleContainer:GetChildren() < 25 and HubState.Visible then
                 local particle = createParticle(ParticleContainer, Themes[HubState.CurrentTheme].Accent)
                 table.insert(HubState.Particles, particle)
@@ -1725,8 +1783,8 @@ function createMainUI()
         ClockLabel.Parent = WelcomeSection
         table.insert(ThemedElements, {Element = ClockLabel, Properties = {TextColor3 = "Accent"}})
 
-        spawn(function()
-            while wait(1) do
+        task.spawn(function()
+            while task.wait(1) do
                 if ClockLabel.Parent then ClockLabel.Text = os.date("%I:%M %p") end
             end
         end)
@@ -1795,8 +1853,8 @@ function createMainUI()
         MemoryLabel.TextXAlignment = Enum.TextXAlignment.Left
         MemoryLabel.Parent = StatsSection
         
-        spawn(function()
-            while wait(1) do
+        task.spawn(function()
+            while task.wait(1) do
                 if FPSLabel.Parent then
                     FPSLabel.Text = (Languages[HubState.CurrentLanguage].fps_label or "FPS") .. ": " .. HubState.Performance.FPS
                     PingLabel.Text = (Languages[HubState.CurrentLanguage].ping_label or "Ping") .. ": " .. HubState.Performance.Ping .. "ms"
@@ -2326,7 +2384,7 @@ function createMainUI()
         InfoPadding.PaddingRight = UDim.new(0, 30)
         InfoPadding.PaddingBottom = UDim.new(0, 30)
         InfoPadding.Parent = InfoContainer
-             
+              
         local InfoTitle = Instance.new("TextLabel")
         InfoTitle.Size = UDim2.new(1, 0, 0, 40)
         InfoTitle.BackgroundTransparency = 1
@@ -2594,7 +2652,7 @@ function showNotification(message, notificationType)
         Position = UDim2.new(0, 0, 0, 0)
     })
     
-    spawn(function()
+    task.spawn(function()
         safeWait(4)
         if notification.Parent then
             safeTween(notification, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
@@ -2665,7 +2723,7 @@ local function initializeHub()
     showNotification("Welcome to 0_0 Hub AI Revolution! Press RightControl to toggle.", "success")
 end
 
-spawn(function()
+task.spawn(function()
     safeWait(2)
     initializeHub()
 end)
@@ -2681,8 +2739,8 @@ game:BindToClose(function()
 end)
 ]]
 
-spawn(function()
-    while safeWait(60) do
+task.spawn(function()
+    while task.wait(60) do
         pcall(function()
             -- FIX: Use modern collectgarbage() syntax
             collectgarbage()
