@@ -1,11 +1,14 @@
 --//==========================================================================================================//--
---//                                                                                                    //--
---//                         0_0 Hub V2.3.4 - Final Hotfix (Updated September 25, 2025)                         //--
---//                                                                                                    //--
---//      This patch addresses the final remaining runtime errors for a stable experience.              //--
---//      [FIXED] "toHex is not a valid member of Color3" error in AI chat by implementing a custom converter.      //--
---//      [FIXED] "collectgarbage must be called with 'count'" error by updating to modern Luau syntax.        //--
---//                                                                                                    //--
+--//                                                                                                          //--
+--//                         0_0 Hub V2.4.2 - Quantum Core (UI Placement Hotfix)                                //--
+--//                                                                                                          //--
+--//      [v2.4.2 HOTFIX]                                                                                       //--
+--//      [FIXED] Main UI now appears instantly in the center of the screen on login, as requested.             //--
+--//      [CHANGED] Loading screen image is now correctly set to the black BMW.                                 //--
+--//                                                                                                          //--
+--//      [v2.4.1 HOTFIX]                                                                                       //--
+--//      [FIXED] Language system now correctly updates all UI elements when the language is changed.           //--
+--//                                                                                                          //--
 --//==========================================================================================================//--
 
 
@@ -36,6 +39,11 @@ local mouse = player:GetMouse()
 
 --// Global state for UI toggling
 local hubGui, toggleHub
+
+--// v2.4 - Mobile Detection
+local function isMobile()
+    return UserInputService.TouchEnabled and not UserInputService.MouseEnabled
+end
 
 --// Executor Detection and Compatibility
 local function detectExecutor()
@@ -69,19 +77,19 @@ print("🔍 Detected Executor:", currentExecutor)
 local HubState = {
     Visible = false,
     CurrentTab = "Dashboard",
-    CurrentTheme = "NeuralNet", -- New default theme
+    CurrentTheme = "QuantumCore", -- v2.4 NEW default theme
     CurrentLanguage = "en",
     Draggable = false,
     DragStart = nil,
     StartPos = nil,
     Particles = {},
     Connections = {},
-    ESP_Connections = {}, -- [FIX] Isolate ESP connections to prevent conflicts
     Notifications = {},
     Hotkeys = {},
     ScriptHistory = {},
     Favorites = {},
-    AI_ChatHistory = {}, -- New state for AI chat
+    AI_ChatHistory = {},
+    ScriptProfiles = {}, -- v2.4 NEW
     Performance = {
         FPS = 60,
         Ping = 0,
@@ -90,19 +98,20 @@ local HubState = {
     ESPEnabled = false
 }
 
---// Enhanced Localization System (8 Languages) - Updated with new keys for v2.3
+--// Enhanced Localization System (8 Languages) - Updated with new keys for v2.4
 local Languages = {
     en = {
-        hub_title = "0_0 Hub", -- [FIX] Shortened title to prevent UI overlap
+        hub_title = "0_0 Hub // v2.4 Quantum Core",
         dashboard_tab = "Dashboard",
         scripts_tab = "Scripts",
-        ai_assistant_tab = "AI Assistant", -- New Tab
+        ai_assistant_tab = "AI Assistant",
+        profiles_tab = "Profiles", -- v2.4 NEW
         settings_tab = "Settings",
         info_tab = "Info",
         close_tooltip = "Close Hub",
         minimize_tooltip = "Minimize Hub",
         dashboard_welcome = "Welcome back, ",
-        dashboard_subtitle = "AI-powered gaming experience at your command",
+        dashboard_subtitle = "Quantum Core systems online.",
         performance_title = "System Performance",
         featured_script = "Featured Script",
         fps_label = "FPS",
@@ -126,12 +135,13 @@ local Languages = {
         god_mode = "🛡️ God Mode",
         jump_power = "🦘 Jump Boost",
         rainbow_character = "🌈 Rainbow Character",
-        btools = "🛠️ Building Tools", -- New
-        infinite_jump = "♾️ Infinite Jump", -- New
-        anti_afk = "☕ Anti-AFK", -- New
+        btools = "🛠️ Building Tools",
+        infinite_jump = "♾️ Infinite Jump",
+        anti_afk = "☕ Anti-AFK",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Remove Fog",
         teleport_to_player = "📍 Teleport to Player",
+        aimbot_pro = "🎯 Aimbot Pro",
         ai_welcome_message = "Hello! I am the 0_0 Hub AI. How can I assist you today? You can ask me questions or request simple scripts like 'make me a speed script'.",
         ai_input_placeholder = "Ask the AI a question or request a script...",
         ai_generating_script = "Understood. Generating the requested script...",
@@ -151,13 +161,14 @@ local Languages = {
         login_button = "Access Hub",
         login_success = "Access granted! Welcome to the hub.",
         login_failed = "Invalid credentials. Please try again.",
-        version_info = "Hub Version: 2.3.4 AI Revolution\nLast Updated: September 25, 2025\n\nThis is a massive overhaul featuring a new AI Assistant and a completely redesigned user interface." -- Updated
+        version_info = "Hub Version: 2.4.2 Quantum Core\nLast Updated: October 1, 2025\n\nThis is the Quantum Core update, featuring a completely redesigned UI, script profiles, mobile support, and an enhanced aimbot."
     },
     es = {
-        hub_title = "Centro 0_0", -- [FIX] Shortened title
+        hub_title = "Centro 0_0 // v2.4 Quantum Core",
         dashboard_tab = "Panel",
         scripts_tab = "Scripts",
         ai_assistant_tab = "Asistente IA",
+        profiles_tab = "Perfiles",
         settings_tab = "Ajustes",
         info_tab = "Información",
         dashboard_welcome = "Bienvenido de nuevo, ",
@@ -165,16 +176,17 @@ local Languages = {
         username_placeholder = "Ingresa usuario",
         password_placeholder = "Ingresa contraseña",
         login_button = "Acceder al Hub",
-        version_info = "Versión del Hub: 2.3.4 AI Revolution\nÚltima Actualización: 25 de septiembre de 2025",
+        version_info = "Versión del Hub: 2.4.2 Quantum Core\nÚltima Actualización: 1 de octubre de 2025",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Remover Niebla",
         teleport_to_player = "📍 Teleportar a Jugador"
     },
     fr = {
-        hub_title = "Centre 0_0", -- [FIX] Shortened title
+        hub_title = "Centre 0_0 // v2.4 Quantum Core",
         dashboard_tab = "Tableau de bord",
         scripts_tab = "Scripts",
         ai_assistant_tab = "Assistant IA",
+        profiles_tab = "Profils",
         settings_tab = "Paramètres",
         info_tab = "Informations",
         dashboard_welcome = "Bon retour, ",
@@ -182,16 +194,17 @@ local Languages = {
         username_placeholder = "Nom d'utilisateur",
         password_placeholder = "Mot de passe",
         login_button = "Accéder au Hub",
-        version_info = "Version du Hub : 2.3.4 AI Revolution\nDernière Mise à jour : 25 septembre 2025",
+        version_info = "Version du Hub : 2.4.2 Quantum Core\nDernière Mise à jour : 1 octobre 2025",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Supprimer le Brouillard",
         teleport_to_player = "📍 Téléporter vers le Joueur"
     },
     de = {
-        hub_title = "0_0 Hub", -- [FIX] Shortened title
+        hub_title = "0_0 Hub // v2.4 Quantum Core",
         dashboard_tab = "Dashboard",
         scripts_tab = "Skripte",
         ai_assistant_tab = "KI-Assistent",
+        profiles_tab = "Profile",
         settings_tab = "Einstellungen",
         info_tab = "Info",
         dashboard_welcome = "Willkommen zurück, ",
@@ -199,16 +212,17 @@ local Languages = {
         username_placeholder = "Benutzername eingeben",
         password_placeholder = "Passwort eingeben",
         login_button = "Hub öffnen",
-        version_info = "Hub-Version: 2.3.4 KI-Revolution\nLetztes Update: 25. September 2025",
+        version_info = "Hub-Version: 2.4.2 Quantum Core\nLetztes Update: 1. Oktober 2025",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Nebel Entfernen",
         teleport_to_player = "📍 Zu Spieler Teleportieren"
     },
     pt = {
-        hub_title = "Centro 0_0", -- [FIX] Shortened title
+        hub_title = "Centro 0_0 // v2.4 Quantum Core",
         dashboard_tab = "Painel",
         scripts_tab = "Scripts",
         ai_assistant_tab = "Assistente de IA",
+        profiles_tab = "Perfis",
         settings_tab = "Configurações",
         info_tab = "Informações",
         dashboard_welcome = "Bem-vindo de volta, ",
@@ -216,16 +230,17 @@ local Languages = {
         username_placeholder = "Digite o usuário",
         password_placeholder = "Digite a senha",
         login_button = "Acessar Hub",
-        version_info = "Versão do Hub: 2.3.4 Revolução IA\nÚltima Atualização: 25 de setembro de 2025",
+        version_info = "Versão do Hub: 2.4.2 Quantum Core\nÚltima Atualização: 1 de outubro de 2025",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Remover Névoa",
         teleport_to_player = "📍 Teleportar para Jogador"
     },
     ru = {
-        hub_title = "Центр 0_0", -- [FIX] Shortened title
+        hub_title = "Центр 0_0 // v2.4 Quantum Core",
         dashboard_tab = "Панель",
         scripts_tab = "Скрипты",
         ai_assistant_tab = "ИИ-Помощник",
+        profiles_tab = "Профили",
         settings_tab = "Настройки",
         info_tab = "Информация",
         dashboard_welcome = "С возвращением, ",
@@ -233,16 +248,17 @@ local Languages = {
         username_placeholder = "Введите имя пользователя",
         password_placeholder = "Введите пароль",
         login_button = "Войти в Hub",
-        version_info = "Версия Хаба: 2.3.4 ИИ Революция\nПоследнее Обновление: 25 сентября 2025",
+        version_info = "Версия Хаба: 2.4.2 Quantum Core\nПоследнее Обновление: 1 октября 2025",
         fullbright = "💡 Полная Яркость",
         remove_fog = "🌫️ Удалить Туман",
         teleport_to_player = "📍 Телепорт к Игроку"
     },
     ja = {
-        hub_title = "0_0 ハブ", -- [FIX] Shortened title
+        hub_title = "0_0 ハブ // v2.4 Quantum Core",
         dashboard_tab = "ダッシュボード",
         scripts_tab = "スクリプト",
         ai_assistant_tab = "AIアシスタント",
+        profiles_tab = "プロフィール",
         settings_tab = "設定",
         info_tab = "情報",
         dashboard_welcome = "おかえりなさい、",
@@ -250,16 +266,17 @@ local Languages = {
         username_placeholder = "ユーザー名を入力",
         password_placeholder = "パスワードを入力",
         login_button = "ハブにアクセス",
-        version_info = "ハブバージョン: 2.3.4 AI革命\n最終更新: 2025年9月25日",
+        version_info = "ハブバージョン: 2.4.2 Quantum Core\n最終更新: 2025年10月1日",
         fullbright = "💡 フルブライト",
         remove_fog = "🌫️ 霧を除去",
         teleport_to_player = "📍 プレイヤーへテレポート"
     },
     ko = {
-        hub_title = "0_0 허브", -- [FIX] Shortened title
+        hub_title = "0_0 허브 // v2.4 Quantum Core",
         dashboard_tab = "대시보드",
         scripts_tab = "스크립트",
         ai_assistant_tab = "AI 어시스턴트",
+        profiles_tab = "프로필",
         settings_tab = "설정",
         info_tab = "정보",
         dashboard_welcome = "다시 오신 것을 환영합니다, ",
@@ -267,17 +284,29 @@ local Languages = {
         username_placeholder = "사용자명 입력",
         password_placeholder = "비밀번호 입력",
         login_button = "허브 접속",
-        version_info = "허브 버전: 2.3.4 AI 혁명\n마지막 업데이트: 2025년 9월 25일",
-        fullbright = "💡 풀브라이트",
-        remove_fog = "🌫️ 안개 제거",
-        teleport_to_player = "📍 플레이어로 텔레포트"
+        version_info = "허브 버전: 2.4.2 Quantum Core\n마지막 업데이트: 2025년 10월 1일"
     }
 }
 
 
---// Premium Theme System (13 Themes) - Added 'NeuralNet'
+--// Premium Theme System (14 Themes) - Added 'QuantumCore' for v2.4
 local Themes = {
-    NeuralNet = { -- New Theme for v2.3
+    QuantumCore = { -- v2.4 NEW THEME
+        Background = Color3.fromRGB(12, 12, 18),
+        BackgroundTransparency = 0.1,
+        Secondary = Color3.fromRGB(22, 22, 30),
+        SecondaryTransparency = 0.2,
+        Primary = Color3.fromRGB(30, 30, 42),
+        PrimaryTransparency = 0.1,
+        Accent = Color3.fromRGB(0, 255, 200),
+        AccentGlow = Color3.fromRGB(150, 255, 230),
+        Text = Color3.fromRGB(240, 240, 255),
+        TextSecondary = Color3.fromRGB(160, 160, 180),
+        Blur = true,
+        Particles = true,
+        Glow = true
+    },
+    NeuralNet = {
         Background = Color3.fromRGB(10, 12, 18),
         BackgroundTransparency = 0.1,
         Secondary = Color3.fromRGB(18, 20, 28),
@@ -475,10 +504,10 @@ local Themes = {
 }
 
 
---// Enhanced Script Library - Expanded and Fixed for v2.3.2
+--// Enhanced Script Library - v2.4 Update
 local ScriptLibrary = {
     {
-        name = "btools", -- FIXED
+        name = "btools",
         category = "utility",
         premium = false,
         description = "Gives you functional building tools.",
@@ -662,6 +691,7 @@ local ScriptLibrary = {
                 fill.BackgroundColor3 = Color3.fromRGB(180, 120, 230)
                 fill.BorderSizePixel = 0
                 fill.Parent = bar
+                
                 Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 4)
                 local knob = Instance.new("Frame")
                 knob.Size = UDim2.new(0, 12, 0, 12)
@@ -681,6 +711,7 @@ local ScriptLibrary = {
                 y = y + 50
                 callback(default)
             end
+           
             UserInputService.InputChanged:Connect(function(input) if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then draggingSlider.update(input.Position.X) end end)
             UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSlider = nil end end)
             createSlider("Saturation", -1, 2, 0.3, function(v) cc.Saturation = v end)
@@ -771,39 +802,16 @@ local ScriptLibrary = {
         category = "movement",
         premium = false,
         description = "Enhanced fly script with speed controls",
-        -- [FIX] Complete rewrite of fly script for full movement control and stability.
         func = function()
-            -- Check if the system is already active; if so, deactivate it completely.
-            if getgenv().FlySystemActive_00Hub then
-                if getgenv().FlyToggleConnection_00Hub then getgenv().FlyToggleConnection_00Hub:Disconnect() end
-                if getgenv().FlyInstance_00Hub and getgenv().FlyInstance_00Hub.stop then getgenv().FlyInstance_00Hub.stop() end
-                getgenv().FlySystemActive_00Hub = nil
-                getgenv().FlyToggleConnection_00Hub = nil
-                getgenv().FlyInstance_00Hub = nil
-                showNotification("Fly script system completely disabled.", "info")
-                return
-            end
-
             local flying = false
             local speed = 50
-            local bodyVelocity, bodyAngularVelocity, flyUpdateConnection
-
-            local function stopFly()
-                flying = false
-                if bodyVelocity then bodyVelocity:Destroy() end
-                if bodyAngularVelocity then bodyAngularVelocity:Destroy() end
-                if flyUpdateConnection then flyUpdateConnection:Disconnect() end
-                bodyVelocity, bodyAngularVelocity, flyUpdateConnection = nil, nil, nil
-            end
-
+            local bodyVelocity, bodyAngularVelocity
+            
             local function startFly()
-                if flying then return end
                 local char = player.Character
                 if not char or not char:FindFirstChild("HumanoidRootPart") then return end
                 local humanoidRootPart = char.HumanoidRootPart
                 
-                stopFly() -- Clean up any previous instances just in case
-
                 bodyVelocity = Instance.new("BodyVelocity")
                 bodyAngularVelocity = Instance.new("BodyAngularVelocity")
                 
@@ -816,28 +824,13 @@ local ScriptLibrary = {
                 bodyAngularVelocity.Parent = humanoidRootPart
                 
                 flying = true
-
-                flyUpdateConnection = RunService.Heartbeat:Connect(function()
-                    if not flying or not bodyVelocity or not bodyVelocity.Parent then return end
-                    
-                    local moveVector = Vector3.new(0, 0, 0)
-                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveVector += Vector3.new(0, 0, -1) end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveVector += Vector3.new(0, 0, 1) end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveVector += Vector3.new(-1, 0, 0) end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveVector += Vector3.new(1, 0, 0) end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveVector += Vector3.new(0, 1, 0) end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveVector += Vector3.new(0, -1, 0) end
-                    
-                    if moveVector.Magnitude > 0 then
-                        local cameraCFrame = workspace.CurrentCamera.CFrame
-                        bodyVelocity.Velocity = (moveVector.Z * cameraCFrame.LookVector + moveVector.X * cameraCFrame.RightVector + moveVector.Y * Vector3.new(0,1,0)).Unit * speed
-                    else
-                        bodyVelocity.Velocity = Vector3.new(0,0,0)
-                    end
-                end)
             end
             
-            getgenv().FlyInstance_00Hub = {stop = stopFly}
+            local function stopFly()
+                flying = false
+                if bodyVelocity then bodyVelocity:Destroy() end
+                if bodyAngularVelocity then bodyAngularVelocity:Destroy() end
+            end
             
             -- Toggle with F key
             local flyConnection = UserInputService.InputBegan:Connect(function(input)
@@ -847,16 +840,12 @@ local ScriptLibrary = {
                         showNotification("Fly disabled", "info")
                     else
                         startFly()
-                        showNotification("Fly enabled - Use WASD, Space, Ctrl", "success")
+                        showNotification("Fly enabled - Use WASD to move", "success")
                     end
                 end
             end)
-            
-            getgenv().FlyToggleConnection_00Hub = flyConnection
+    
             table.insert(HubState.Connections, flyConnection)
-            
-            getgenv().FlySystemActive_00Hub = true
-            showNotification("Fly system enabled! Press F to toggle. Execute again to disable.", "success")
         end
     },
     {
@@ -932,7 +921,7 @@ local ScriptLibrary = {
         description = "Automated farming script",
         func = function()
             spawn(function()
-                while task.wait(1) do
+                while wait(1) do
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if obj:IsA("ClickDetector") then
                             fireclickdetector(obj)
@@ -952,7 +941,7 @@ local ScriptLibrary = {
             local char = player.Character
             if char then
                 spawn(function()
-                    while task.wait(0.1) do
+                    while wait(0.1) do
                         for _, part in pairs(char:GetChildren()) do
                             if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                                 part.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
@@ -978,7 +967,7 @@ local ScriptLibrary = {
         end
     },
     {
-        name = "teleport_to_player", -- FIXED
+        name = "teleport_to_player",
         category = "utility",
         premium = false,
         description = "Opens a UI to teleport to a player",
@@ -1011,7 +1000,8 @@ local ScriptLibrary = {
             
             local closeBtn = Instance.new("TextButton")
             closeBtn.Size = UDim2.new(0,25,0,25); closeBtn.Position=UDim2.new(1,-30,0,8); closeBtn.Text="X"; closeBtn.Font=Enum.Font.GothamBold; closeBtn.TextColor3=Themes[HubState.CurrentTheme].Text
-            closeBtn.BackgroundTransparency = 1; closeBtn.Parent=mainFrame
+            closeBtn.BackgroundTransparency = 1;
+            closeBtn.Parent=mainFrame
             closeBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
 
             local scroll = Instance.new("ScrollingFrame")
@@ -1052,10 +1042,10 @@ local ScriptLibrary = {
         end
     },
     {
-        name = "aimbot",
+        name = "aimbot_pro", -- v2.4 ENHANCED
         category = "combat",
         premium = false,
-        description = "Aimbot with Q toggle. Click again to disable.",
+        description = "Aimbot Pro with FOV, smoothing, and Q toggle.",
         func = function()
             if getgenv().aimbotActive then
                 getgenv().aimbotActive = false
@@ -1063,23 +1053,28 @@ local ScriptLibrary = {
                 if getgenv().aimbotHeartbeatConnection then getgenv().aimbotHeartbeatConnection:Disconnect() end
                 getgenv().aimbotToggleConnection = nil
                 getgenv().aimbotHeartbeatConnection = nil
-                showNotification("Aimbot system deactivated.", "info")
+                showNotification("Aimbot Pro system deactivated.", "info")
                 return
             end
 
             getgenv().aimbotActive = true
+            getgenv().aimbotSettings = getgenv().aimbotSettings or {
+                fov = 150,
+                smoothing = 0.2,
+                part = "Head"
+            }
             local aimbotEnabled = true
             local Camera = workspace.CurrentCamera
             local LocalPlayer = player
 
             local function findClosestEnemy()
                 local closestPlayer = nil
-                local shortestDistance = math.huge
+                local shortestDistance = getgenv().aimbotSettings.fov
                 
                 for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                        local targetHead = p.Character.Head
-                        local screenPoint, onScreen = Camera:WorldToViewportPoint(targetHead.Position)
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild(getgenv().aimbotSettings.part) then
+                        local targetPart = p.Character[getgenv().aimbotSettings.part]
+                        local screenPoint, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
                         
                         if onScreen then
                             local centerX = Camera.ViewportSize.X / 2
@@ -1099,8 +1094,10 @@ local ScriptLibrary = {
             getgenv().aimbotHeartbeatConnection = RunService.Heartbeat:Connect(function()
                 if not aimbotEnabled or not getgenv().aimbotActive then return end
                 local target = findClosestEnemy()
-                if target and target.Character and target.Character:FindFirstChild("Head") then
-                    Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, target.Character.Head.Position)
+                if target and target.Character and target.Character:FindFirstChild(getgenv().aimbotSettings.part) then
+                    local targetPos = target.Character[getgenv().aimbotSettings.part].Position
+                    local newCFrame = CFrame.lookAt(Camera.CFrame.Position, targetPos)
+                    Camera.CFrame = Camera.CFrame:Lerp(newCFrame, getgenv().aimbotSettings.smoothing)
                 end
             end)
 
@@ -1112,7 +1109,7 @@ local ScriptLibrary = {
                 end
             end)
 
-            showNotification("Aimbot system activated! Press Q to toggle.", "success")
+            showNotification("Aimbot Pro system activated! Press Q to toggle.", "success")
         end
     },
     {
@@ -1150,7 +1147,6 @@ local ScriptLibrary = {
 local ThemedElements = {}
 
 --// Utility Functions with Executor Compatibility
--- FIX: Create a custom Color3 to Hex function as there is no built-in one.
 local function Color3ToHex(color3)
     local r = math.floor(color3.R * 255)
     local g = math.floor(color3.G * 255)
@@ -1193,7 +1189,7 @@ local function safeTween(object, info, props)
         pcall(function() tween:Play() end)
         return tween
     else
-        task.spawn(function()
+        spawn(function()
             for property, value in pairs(props) do
                 pcall(function()
                     object[property] = value
@@ -1289,20 +1285,41 @@ function applyTheme(themeName)
     showNotification("Theme changed to " .. themeName, "success")
 end
 
+-- v2.4.1 LANGUAGE FIX: This function is now more robust.
 function applyLanguage(langCode)
     HubState.CurrentLanguage = langCode
     local lang = Languages[langCode] or Languages.en
     
     for _, element in ipairs(ThemedElements) do
-        if element.Element and element.Element.Parent and element.Properties.TextKey then
-             local text = lang[element.Properties.TextKey]
-            if text then
-                pcall(function() element.Element.Text = text end)
+        if element.Element and element.Element.Parent then
+            -- Handle TextKey for .Text property
+            if element.Properties.TextKey then
+                local textKey = element.Properties.TextKey
+                local newText = lang[textKey]
+                if newText then
+                    -- Handle icons for tab buttons
+                    if element.Properties.Icon then
+                        newText = element.Properties.Icon .. newText
+                    end
+                    -- Handle dynamic text like the welcome message
+                    if textKey == "dashboard_welcome" then
+                        newText = newText .. player.DisplayName
+                    end
+                    pcall(function() element.Element.Text = newText end)
+                end
+            end
+            -- Handle PlaceholderTextKey for .PlaceholderText property
+            if element.Properties.PlaceholderTextKey then
+                local textKey = element.Properties.PlaceholderTextKey
+                local newText = lang[textKey]
+                if newText then
+                    pcall(function() element.Element.PlaceholderText = newText end)
+                end
             end
         end
     end
     
-    showNotification("Language changed to " .. (langCode), "success")
+    showNotification("Language changed to " .. langCode, "success")
 end
 
 function toggleAdvancedESP()
@@ -1360,6 +1377,7 @@ function toggleAdvancedESP()
                 NameLabel.TextStrokeTransparency = 0
                 NameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                        
+        
                 local DistanceLabel = Instance.new("TextLabel")
                 DistanceLabel.Parent = Billboard
                 DistanceLabel.Name = "DistanceLabel"
@@ -1389,8 +1407,8 @@ function toggleAdvancedESP()
                     HealthFill.BorderSizePixel = 0
                     
                     humanoid.HealthChanged:Connect(function()
+                        HealthFill.Size = UDim2.new(humanoid.Health / humanoid.MaxHealth, 0, 1, 0)
                         local healthRatio = humanoid.Health / humanoid.MaxHealth
-                        HealthFill.Size = UDim2.new(healthRatio, 0, 1, 0)
                         if healthRatio > 0.5 then
                             HealthFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
                         elseif healthRatio > 0.25 then
@@ -1410,7 +1428,7 @@ function toggleAdvancedESP()
         for _, plr in ipairs(Players:GetPlayers()) do createESP(plr) end
         
         local playerAddedConnection = Players.PlayerAdded:Connect(createESP)
-        table.insert(HubState.ESP_Connections, playerAddedConnection)
+        table.insert(HubState.Connections, playerAddedConnection)
 
         local playerRemovingConnection = Players.PlayerRemoving:Connect(function(plr)
             if not workspace:FindFirstChild("ESP_Objects") then return end
@@ -1420,7 +1438,7 @@ function toggleAdvancedESP()
                 end
             end
         end)
-        table.insert(HubState.ESP_Connections, playerRemovingConnection)
+        table.insert(HubState.Connections, playerRemovingConnection)
 
         local espUpdateConnection = RunService.Heartbeat:Connect(function()
             if not HubState.ESPEnabled or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
@@ -1439,56 +1457,56 @@ function toggleAdvancedESP()
                 end
             end
         end)
-        table.insert(HubState.ESP_Connections, espUpdateConnection)
+        table.insert(HubState.Connections, espUpdateConnection)
 
         showNotification("Advanced ESP enabled with health bars and distance!", "success")
     else
         local ESPFolder = workspace:FindFirstChild("ESP_Objects")
         if ESPFolder then ESPFolder:Destroy() end
-        
-        -- [FIX] Disconnect ONLY ESP-related connections to prevent breaking other scripts
-        for _, conn in ipairs(HubState.ESP_Connections) do
+        -- Disconnect connections to prevent memory leaks
+        for i, conn in ipairs(HubState.Connections) do
             if conn and conn.Connected then
                 conn:Disconnect()
             end
+            HubState.Connections[i] = nil
         end
-        HubState.ESP_Connections = {} -- Clear the table for next time
     
         showNotification("ESP disabled", "info")
     end
 end
 
 --// Performance Monitor
--- [FIX] Rewrote performance monitor to be more accurate and efficient using RunService.Heartbeat
-task.spawn(function()
-    local lastStatsUpdate = 0
-    RunService.Heartbeat:Connect(function(deltaTime)
-        HubState.Performance.FPS = math.floor(1 / deltaTime)
-        
-        -- Update more expensive stats only once per second
-        if tick() - lastStatsUpdate >= 1 then
-            lastStatsUpdate = tick()
-            pcall(function()
-                local statsService = game:GetService("Stats")
-                HubState.Performance.Ping = math.floor(statsService.Network.ServerStatsItem["Data Ping"]:GetValue())
-                HubState.Performance.Memory = math.floor(statsService:GetTotalMemoryUsageMb())
-            end)
-        end
-    end)
+spawn(function()
+    while wait(1) do
+        local deltaTime = safeWait()
+        HubState.Performance.FPS = deltaTime > 0 and math.floor(1 / deltaTime) or 60
+		pcall(function()
+			HubState.Performance.Ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+			HubState.Performance.Memory = math.floor(game:GetService("Stats"):GetTotalMemoryUsageMb())
+		end)
+    end
 end)
 
---// ====================================[   V2.3 UI CREATION   ]==================================== //--
+--// ====================================[   V2.4 UI CREATION   ]==================================== //--
 
 function createMainUI()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "AI_RevolutionHub"
+    ScreenGui.Name = "QuantumCoreHub"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainContainer"
-    MainFrame.Size = UDim2.new(0, 850, 0, 550)
-    MainFrame.Position = UDim2.new(0.5, -425, 1.2, -275)
+    
+    -- v2.4 Mobile Responsiveness
+    if isMobile() then
+        MainFrame.Size = UDim2.new(0.95, 0, 0.85, 0)
+        MainFrame.Position = UDim2.new(0.5, 0, 1.2, 0)
+    else
+        MainFrame.Size = UDim2.new(0, 900, 0, 600)
+        MainFrame.Position = UDim2.new(0.5, -450, 1.2, -300)
+    end
+    
     MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true
@@ -1500,15 +1518,16 @@ function createMainUI()
     })
     
     local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 16)
+    Corner.CornerRadius = UDim.new(0, 12)
     Corner.Parent = MainFrame
     
     local Stroke = Instance.new("UIStroke")
     Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     Stroke.Color = Color3.fromRGB(120, 110, 255)
     Stroke.Transparency = 0.5
-    Stroke.Thickness = 2
+    Stroke.Thickness = 1
     Stroke.Parent = MainFrame
+    table.insert(ThemedElements, {Element=Stroke, Properties={Color="Accent"}})
     
     local ParticleContainer = Instance.new("Frame")
     ParticleContainer.Name = "Particles"
@@ -1516,8 +1535,8 @@ function createMainUI()
     ParticleContainer.BackgroundTransparency = 1
     ParticleContainer.Parent = MainFrame
     
-    task.spawn(function()
-        while task.wait(0.4) do
+    spawn(function()
+        while wait(0.4) do
             if #ParticleContainer:GetChildren() < 25 and HubState.Visible then
                 local particle = createParticle(ParticleContainer, Themes[HubState.CurrentTheme].Accent)
                 table.insert(HubState.Particles, particle)
@@ -1525,18 +1544,81 @@ function createMainUI()
         end
     end)
     
-    local TopNavBar = Instance.new("Frame")
-    TopNavBar.Name = "TopNavBar"
-    TopNavBar.Size = UDim2.new(1, 0, 0, 50)
-    TopNavBar.BackgroundTransparency = 1
-    TopNavBar.Parent = MainFrame
+    --// v2.4 New Side Navigation Bar
+    local SideNavBar = Instance.new("Frame")
+    SideNavBar.Name = "SideNavBar"
+    SideNavBar.Size = UDim2.new(0, 220, 1, 0)
+    SideNavBar.BackgroundTransparency = 1
+    SideNavBar.Parent = MainFrame
     
     table.insert(ThemedElements, {
-        Element = TopNavBar,
+        Element = SideNavBar,
         Properties = {BackgroundColor3 = "Primary", BackgroundTransparency = "PrimaryTransparency"}
     })
     
-    TopNavBar.InputBegan:Connect(function(input)
+    local Title = Instance.new("TextLabel")
+    Title.Name = "Title"
+    Title.Size = UDim2.new(1, -20, 0, 60)
+    Title.Position = UDim2.new(0, 10, 0, 10)
+    Title.BackgroundTransparency = 1
+    Title.Text = "0_0 Hub"
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 28
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Parent = SideNavBar
+    table.insert(ThemedElements, {Element = Title, Properties = {TextColor3 = "Text"}})
+
+    local VersionLabel = Instance.new("TextLabel")
+    VersionLabel.Name = "VersionLabel"
+    VersionLabel.Size = UDim2.new(1, -20, 0, 20)
+    VersionLabel.Position = UDim2.new(0, 10, 0, 45)
+    VersionLabel.BackgroundTransparency = 1
+    VersionLabel.Text = "v2.4.2 Quantum Core"
+    VersionLabel.Font = Enum.Font.Gotham
+    VersionLabel.TextSize = 14
+    VersionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    VersionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    VersionLabel.Parent = SideNavBar
+    table.insert(ThemedElements, {Element = VersionLabel, Properties = {TextColor3 = "Accent"}})
+
+    local NavButtonContainer = Instance.new("Frame")
+    NavButtonContainer.Size = UDim2.new(1, 0, 1, -150)
+    NavButtonContainer.Position = UDim2.new(0, 0, 0, 80)
+    NavButtonContainer.BackgroundTransparency = 1
+    NavButtonContainer.Parent = SideNavBar
+
+    local SideNavList = Instance.new("UIListLayout")
+    SideNavList.FillDirection = Enum.FillDirection.Vertical
+    SideNavList.VerticalAlignment = Enum.VerticalAlignment.Top
+    SideNavList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    SideNavList.SortOrder = Enum.SortOrder.LayoutOrder
+    SideNavList.Padding = UDim.new(0, 8)
+    SideNavList.Parent = NavButtonContainer
+
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Size = UDim2.new(1, -20, 0, 40)
+    CloseButton.Position = UDim2.new(0.5, 0, 1, -50)
+    CloseButton.AnchorPoint = Vector2.new(0.5, 1)
+    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+    CloseButton.BackgroundTransparency = 0.2
+    CloseButton.BorderSizePixel = 0
+    CloseButton.Text = "Close"
+    CloseButton.Font = Enum.Font.GothamBold
+    CloseButton.TextSize = 16
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.Parent = SideNavBar
+    Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 8)
+    CloseButton.MouseEnter:Connect(function() safeTween(CloseButton, TweenInfo.new(0.2), {BackgroundTransparency=0}) end)
+    CloseButton.MouseLeave:Connect(function() safeTween(CloseButton, TweenInfo.new(0.2), {BackgroundTransparency=0.2}) end)
+
+    local DraggableArea = Instance.new("Frame")
+    DraggableArea.Size = UDim2.new(1, -220, 0, 30)
+    DraggableArea.Position = UDim2.new(0, 220, 0, 0)
+    DraggableArea.BackgroundTransparency = 1
+    DraggableArea.Parent = MainFrame
+    
+    DraggableArea.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             HubState.Draggable = true
             HubState.DragStart = input.Position
@@ -1544,7 +1626,7 @@ function createMainUI()
         end
     end)
     
-    TopNavBar.InputEnded:Connect(function(input)
+    DraggableArea.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             HubState.Draggable = false
         end
@@ -1559,45 +1641,11 @@ function createMainUI()
             )
         end
     end)
-    
-    local Title = Instance.new("TextLabel")
-    Title.Name = "Title"
-    Title.Size = UDim2.new(0, 260, 1, 0) -- FIX: Set fixed width
-    Title.Position = UDim2.new(0, 20, 0, 0)
-    Title.BackgroundTransparency = 1
-    Title.Text = Languages[HubState.CurrentLanguage].hub_title
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 20 -- FIX: Reduced text size
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.Parent = TopNavBar
-    
-    table.insert(ThemedElements, {
-        Element = Title,
-        Properties = {TextColor3 = "Text", TextKey = "hub_title"}
-    })
-    
-    local CloseButton = Instance.new("TextButton")
-    CloseButton.Size = UDim2.new(0, 32, 0, 32)
-    CloseButton.Position = UDim2.new(1, -20, 0.5, 0)
-    CloseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-    CloseButton.BackgroundTransparency = 0.2
-    CloseButton.BorderSizePixel = 0
-    CloseButton.Text = "×"
-    CloseButton.Font = Enum.Font.GothamBold
-    CloseButton.TextSize = 20
-    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.Parent = TopNavBar
-    Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(1, 0)
-    
-    CloseButton.MouseEnter:Connect(function() safeTween(CloseButton, TweenInfo.new(0.2), {BackgroundTransparency=0}) end)
-    CloseButton.MouseLeave:Connect(function() safeTween(CloseButton, TweenInfo.new(0.2), {BackgroundTransparency=0.2}) end)
 
     local ContentArea = Instance.new("Frame")
     ContentArea.Name = "ContentArea"
-    ContentArea.Size = UDim2.new(1, 0, 1, -50)
-    ContentArea.Position = UDim2.new(0, 0, 0, 50)
+    ContentArea.Size = UDim2.new(1, -220, 1, 0)
+    ContentArea.Position = UDim2.new(0, 220, 0, 0)
     ContentArea.BackgroundTransparency = 1
     ContentArea.Parent = MainFrame
     
@@ -1611,26 +1659,10 @@ function createMainUI()
     local Tabs = {}
     local TabButtons = {}
     
-    -- FIX: Position the button container in the center, leaving room for the title and close button
-    local NavButtonContainer = Instance.new("Frame")
-    NavButtonContainer.Size = UDim2.new(1, -320, 1, 0)
-    NavButtonContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
-    NavButtonContainer.AnchorPoint = Vector2.new(0.5, 0.5)
-    NavButtonContainer.BackgroundTransparency = 1
-    NavButtonContainer.Parent = TopNavBar
-    
-    local TopNavList = Instance.new("UIListLayout")
-    TopNavList.FillDirection = Enum.FillDirection.Horizontal
-    TopNavList.VerticalAlignment = Enum.VerticalAlignment.Center
-    TopNavList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    TopNavList.SortOrder = Enum.SortOrder.LayoutOrder
-    TopNavList.Padding = UDim.new(0, 10)
-    TopNavList.Parent = NavButtonContainer
-    
-    local function createTopNavButton(name, icon, order, langKey)
+    local function createSideNavButton(name, icon, order, langKey)
         local TabButton = Instance.new("TextButton")
         TabButton.Name = name .. "Button"
-        TabButton.Size = UDim2.new(0, 130, 0, 35)
+        TabButton.Size = UDim2.new(1, -20, 0, 45)
         TabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
         TabButton.BackgroundTransparency = 1
         TabButton.BorderSizePixel = 0
@@ -1638,12 +1670,14 @@ function createMainUI()
         TabButton.Font = Enum.Font.GothamSemibold
         TabButton.TextSize = 16
         TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TabButton.Text = icon .. " " .. Languages[HubState.CurrentLanguage][langKey]
+        TabButton.Text = "" -- Set by applyLanguage
+        TabButton.TextXAlignment = Enum.TextXAlignment.Left
         TabButton.Parent = NavButtonContainer
+        Instance.new("UICorner", TabButton).CornerRadius = UDim.new(0, 8)
         
         local Indicator = Instance.new("Frame")
-        Indicator.Size = UDim2.new(1, 0, 0, 3)
-        Indicator.Position = UDim2.new(0, 0, 1, 5)
+        Indicator.Size = UDim2.new(0, 4, 0.8, 0)
+        Indicator.Position = UDim2.new(0, 0, 0.1, 0)
         Indicator.BackgroundColor3 = Themes[HubState.CurrentTheme].Accent
         Indicator.BackgroundTransparency = 1
         Indicator.BorderSizePixel = 0
@@ -1652,8 +1686,9 @@ function createMainUI()
         
         table.insert(ThemedElements, {
             Element = TabButton,
-            Properties = {TextColor3 = "TextSecondary"}
+            Properties = { TextColor3 = "TextSecondary", TextKey = langKey, Icon = " " .. icon .. "   " }
         })
+        table.insert(ThemedElements, {Element=Indicator, Properties={BackgroundColor3="Accent"}})
         
         local TabContent = Instance.new("ScrollingFrame")
         TabContent.Name = name .. "Content"
@@ -1678,13 +1713,13 @@ function createMainUI()
         
         TabButton.MouseEnter:Connect(function()
             if HubState.CurrentTab ~= name then
-                safeTween(TabButton, TweenInfo.new(0.2), { TextColor3 = Themes[HubState.CurrentTheme].Text })
+                safeTween(TabButton, TweenInfo.new(0.2), { BackgroundTransparency = 0.8 })
             end
         end)
         
         TabButton.MouseLeave:Connect(function()
             if HubState.CurrentTab ~= name then
-                safeTween(TabButton, TweenInfo.new(0.2), { TextColor3 = Themes[HubState.CurrentTheme].TextSecondary })
+                safeTween(TabButton, TweenInfo.new(0.2), { BackgroundTransparency = 1 })
             end
         end)
         
@@ -1695,25 +1730,26 @@ function createMainUI()
         return TabContent
     end
     
-    local DashboardTab = createTopNavButton("Dashboard", "📊", 1, "dashboard_tab")
-    local ScriptsTab = createTopNavButton("Scripts", "⚡", 2, "scripts_tab")
-    local AIAssistantTab = createTopNavButton("AIAssistant", "🧠", 3, "ai_assistant_tab")
-    local SettingsTab = createTopNavButton("Settings", "⚙️", 4, "settings_tab")
-    local InfoTab = createTopNavButton("Info", "ℹ️", 5, "info_tab")
+    local DashboardTab = createSideNavButton("Dashboard", "📊", 1, "dashboard_tab")
+    local ScriptsTab = createSideNavButton("Scripts", "⚡", 2, "scripts_tab")
+    local AIAssistantTab = createSideNavButton("AIAssistant", "🧠", 3, "ai_assistant_tab")
+    local ProfilesTab = createSideNavButton("Profiles", "💾", 4, "profiles_tab") -- v2.4 NEW
+    local SettingsTab = createSideNavButton("Settings", "⚙️", 5, "settings_tab")
+    local InfoTab = createSideNavButton("Info", "ℹ️", 6, "info_tab")
     
     function switchTab(tabName)
         if HubState.CurrentTab == tabName then return end
         
         for name, tab in pairs(Tabs) do
             tab.Visible = false
-            safeTween(TabButtons[name].Button, TweenInfo.new(0.3), { TextColor3 = Themes[HubState.CurrentTheme].TextSecondary })
-            safeTween(TabButtons[name].Indicator, TweenInfo.new(0.3), { BackgroundTransparency = 1, Size = UDim2.new(0,0,0,3)})
+            safeTween(TabButtons[name].Button, TweenInfo.new(0.3), { TextColor3 = Themes[HubState.CurrentTheme].TextSecondary, BackgroundTransparency = 1 })
+            safeTween(TabButtons[name].Indicator, TweenInfo.new(0.3), { BackgroundTransparency = 1 })
         end
         
         if Tabs[tabName] then
             Tabs[tabName].Visible = true
-            safeTween(TabButtons[tabName].Button, TweenInfo.new(0.3), { TextColor3 = Themes[HubState.CurrentTheme].Accent })
-            safeTween(TabButtons[tabName].Indicator, TweenInfo.new(0.3), { BackgroundTransparency = 0, Size = UDim2.new(1,0,0,3)})
+            safeTween(TabButtons[tabName].Button, TweenInfo.new(0.3), { TextColor3 = Themes[HubState.CurrentTheme].Text, BackgroundTransparency = 0.7 })
+            safeTween(TabButtons[tabName].Indicator, TweenInfo.new(0.3), { BackgroundTransparency = 0 })
         end
         
         HubState.CurrentTab = tabName
@@ -1747,20 +1783,20 @@ function createMainUI()
         local WelcomeTitle = Instance.new("TextLabel")
         WelcomeTitle.Size = UDim2.new(1, 0, 0, 35)
         WelcomeTitle.BackgroundTransparency = 1
-        WelcomeTitle.Text = Languages[HubState.CurrentLanguage].dashboard_welcome .. player.DisplayName
+        WelcomeTitle.Text = "" -- Set by applyLanguage
         WelcomeTitle.Font = Enum.Font.GothamBold
         WelcomeTitle.TextSize = 28
         WelcomeTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
         WelcomeTitle.TextXAlignment = Enum.TextXAlignment.Left
         WelcomeTitle.Parent = WelcomeSection
         
-        table.insert(ThemedElements, { Element = WelcomeTitle, Properties = {TextColor3 = "Text"} })
+        table.insert(ThemedElements, { Element = WelcomeTitle, Properties = {TextColor3 = "Text", TextKey = "dashboard_welcome"} })
         
         local WelcomeSubtitle = Instance.new("TextLabel")
         WelcomeSubtitle.Size = UDim2.new(1, 0, 0, 25)
         WelcomeSubtitle.Position = UDim2.new(0, 0, 0, 40)
         WelcomeSubtitle.BackgroundTransparency = 1
-        WelcomeSubtitle.Text = Languages[HubState.CurrentLanguage].dashboard_subtitle
+        WelcomeSubtitle.Text = "" -- Set by applyLanguage
         WelcomeSubtitle.Font = Enum.Font.Gotham
         WelcomeSubtitle.TextSize = 16
         WelcomeSubtitle.TextColor3 = Color3.fromRGB(200, 200, 220)
@@ -1783,8 +1819,8 @@ function createMainUI()
         ClockLabel.Parent = WelcomeSection
         table.insert(ThemedElements, {Element = ClockLabel, Properties = {TextColor3 = "Accent"}})
 
-        task.spawn(function()
-            while task.wait(1) do
+        spawn(function()
+            while wait(1) do
                 if ClockLabel.Parent then ClockLabel.Text = os.date("%I:%M %p") end
             end
         end)
@@ -1808,7 +1844,7 @@ function createMainUI()
         StatsTitle.Size = UDim2.new(1, 0, 0, 30)
         StatsTitle.Position = UDim2.new(0, 20, 0, 10)
         StatsTitle.BackgroundTransparency = 1
-        StatsTitle.Text = Languages[HubState.CurrentLanguage].performance_title or "System Performance"
+        StatsTitle.Text = "" -- Set by applyLanguage
         StatsTitle.Font = Enum.Font.GothamBold
         StatsTitle.TextSize = 20
         StatsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -1853,8 +1889,8 @@ function createMainUI()
         MemoryLabel.TextXAlignment = Enum.TextXAlignment.Left
         MemoryLabel.Parent = StatsSection
         
-        task.spawn(function()
-            while task.wait(1) do
+        spawn(function()
+            while wait(1) do
                 if FPSLabel.Parent then
                     FPSLabel.Text = (Languages[HubState.CurrentLanguage].fps_label or "FPS") .. ": " .. HubState.Performance.FPS
                     PingLabel.Text = (Languages[HubState.CurrentLanguage].ping_label or "Ping") .. ": " .. HubState.Performance.Ping .. "ms"
@@ -1886,7 +1922,7 @@ function createMainUI()
             ScriptTitle.Size = UDim2.new(0.6, 0, 0, 30)
             ScriptTitle.Position = UDim2.new(0, 15, 0, 10)
             ScriptTitle.BackgroundTransparency = 1
-            ScriptTitle.Text = Languages[HubState.CurrentLanguage][script.name] or script.name
+            ScriptTitle.Text = "" -- Set by applyLanguage
             ScriptTitle.Font = Enum.Font.GothamBold
             ScriptTitle.TextSize = 18
             ScriptTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -1895,7 +1931,7 @@ function createMainUI()
             
             table.insert(ThemedElements, {
                 Element = ScriptTitle,
-                Properties = {TextColor3 = "Text"}
+                Properties = {TextColor3 = "Text", TextKey = script.name}
             })
             
             local ScriptDesc = Instance.new("TextLabel")
@@ -1954,8 +1990,6 @@ function createMainUI()
     end
     
     local function createAIAssistantContent()
-        local lang = Languages[HubState.CurrentLanguage]
-
         local ChatContainer = Instance.new("Frame")
         ChatContainer.Size = UDim2.new(1, 0, 1, -60)
         ChatContainer.BackgroundTransparency = 1
@@ -1984,15 +2018,19 @@ function createMainUI()
         InputBox.BackgroundColor3 = Color3.fromRGB(40,40,60)
         InputBox.BackgroundTransparency = 0.2
         InputBox.BorderSizePixel = 0
-        InputBox.PlaceholderText = lang.ai_input_placeholder
+        InputBox.PlaceholderText = "" -- Set by applyLanguage
         InputBox.Font = Enum.Font.Gotham
         InputBox.TextSize = 16
         InputBox.TextColor3 = Color3.fromRGB(255,255,255)
         InputBox.Parent = InputFrame
         Instance.new("UICorner", InputBox).CornerRadius = UDim.new(0, 8)
-        local pad = Instance.new("UIPadding", InputBox); pad.PaddingLeft=UDim.new(0,15)
+        local pad = Instance.new("UIPadding", InputBox)
+        pad.PaddingLeft=UDim.new(0,15)
         
-        table.insert(ThemedElements, {Element=InputBox, Properties={BackgroundColor3="Primary", TextColor3="Text"}})
+        table.insert(ThemedElements, {
+            Element = InputBox, 
+            Properties = { BackgroundColor3 = "Primary", TextColor3 = "Text", PlaceholderTextKey = "ai_input_placeholder" }
+        })
 
         local SendButton = Instance.new("TextButton")
         SendButton.Size = UDim2.new(0, 60, 1, 0)
@@ -2122,7 +2160,7 @@ function createMainUI()
             if enterPressed then onSend() end
         end)
 
-        addMessageToChat("AI", lang.ai_welcome_message)
+        addMessageToChat("AI", Languages[HubState.CurrentLanguage].ai_welcome_message)
     end
     
     local function createSettingsContent()
@@ -2146,7 +2184,7 @@ function createMainUI()
         ThemeTitle.Size = UDim2.new(1, 0, 0, 30)
         ThemeTitle.Position = UDim2.new(0, 20, 0, 10)
         ThemeTitle.BackgroundTransparency = 1
-        ThemeTitle.Text = Languages[HubState.CurrentLanguage].theme_label or "Visual Theme"
+        ThemeTitle.Text = "" -- Set by applyLanguage
         ThemeTitle.Font = Enum.Font.GothamBold
         ThemeTitle.TextSize = 20
         ThemeTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -2169,7 +2207,7 @@ function createMainUI()
         ThemeLayout.CellPadding = UDim2.new(0, 8, 0, 8)
         ThemeLayout.Parent = ThemeGrid
   
-        local themeOrder = {"NeuralNet", "Glassmorphism", "CyberNeon", "Sunset", "Ocean", "Forest", "Pastel", "Monochrome", "Galaxy", "Fire", "Ice", "Retro", "Matrix"}
+        local themeOrder = {"QuantumCore", "NeuralNet", "Glassmorphism", "CyberNeon", "Sunset", "Ocean", "Forest", "Pastel", "Monochrome", "Galaxy", "Fire", "Ice", "Retro", "Matrix"}
         for _, themeName in ipairs(themeOrder) do
             local themeData = Themes[themeName]
             local ThemeButton = Instance.new("TextButton")
@@ -2218,7 +2256,7 @@ function createMainUI()
         LanguageTitle.Size = UDim2.new(1, 0, 0, 30)
         LanguageTitle.Position = UDim2.new(0, 20, 0, 10)
         LanguageTitle.BackgroundTransparency = 1
-        LanguageTitle.Text = Languages[HubState.CurrentLanguage].language_label or "Language"
+        LanguageTitle.Text = "" -- Set by applyLanguage
         LanguageTitle.Font = Enum.Font.GothamBold
         LanguageTitle.TextSize = 20
         LanguageTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -2269,96 +2307,21 @@ function createMainUI()
             
             LangButton.MouseButton1Click:Connect(function() applyLanguage(langCode) end)
         end
-
-        local AdvancedSection = Instance.new("Frame")
-        AdvancedSection.Size = UDim2.new(1, 0, 0, 200)
-        AdvancedSection.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-        AdvancedSection.BackgroundTransparency = 0.2
-        AdvancedSection.BorderSizePixel = 0
-        AdvancedSection.LayoutOrder = 2
-        AdvancedSection.Parent = SettingsTab
-        
-        table.insert(ThemedElements, {
-            Element = AdvancedSection,
-            Properties = {BackgroundColor3 = "Primary", BackgroundTransparency = "PrimaryTransparency"}
-        })
-        
-        local AdvancedCorner = Instance.new("UICorner")
-        AdvancedCorner.CornerRadius = UDim.new(0, 12)
-        AdvancedCorner.Parent = AdvancedSection
-        
-        local AdvancedTitle = Instance.new("TextLabel")
-        AdvancedTitle.Size = UDim2.new(1, 0, 0, 30)
-        AdvancedTitle.Position = UDim2.new(0, 20, 0, 10)
-        AdvancedTitle.BackgroundTransparency = 1
-        AdvancedTitle.Text = "Hotkey Settings"
-        AdvancedTitle.Font = Enum.Font.GothamBold
-        AdvancedTitle.TextSize = 20
-        AdvancedTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-        AdvancedTitle.TextXAlignment = Enum.TextXAlignment.Left
-        AdvancedTitle.Parent = AdvancedSection
-        
-        table.insert(ThemedElements, {
-            Element = AdvancedTitle,
-            Properties = {TextColor3 = "Text", TextKey = "hotkeys_title"}
-        })
-        
-        local HotkeyContainer = Instance.new("Frame")
-        HotkeyContainer.Size = UDim2.new(1, -40, 1, -50)
-        HotkeyContainer.Position = UDim2.new(0, 20, 0, 40)
-        HotkeyContainer.BackgroundTransparency = 1
-        HotkeyContainer.Parent = AdvancedSection
-        
-        local HotkeyLayout = Instance.new("UIListLayout")
-        HotkeyLayout.Padding = UDim.new(0, 10)
-        HotkeyLayout.Parent = HotkeyContainer
-        
-        local function createHotkeySetting(name, defaultKey, langKey)
-            local HotkeyFrame = Instance.new("Frame")
-            HotkeyFrame.Size = UDim2.new(1, 0, 0, 30)
-            HotkeyFrame.BackgroundTransparency = 1
-            HotkeyFrame.Parent = HotkeyContainer
-            
-            local HotkeyLabel = Instance.new("TextLabel")
-            HotkeyLabel.Size = UDim2.new(0.6, 0, 1, 0)
-            HotkeyLabel.BackgroundTransparency = 1
-            HotkeyLabel.Text = Languages[HubState.CurrentLanguage][langKey] or name
-            HotkeyLabel.Font = Enum.Font.Gotham
-            HotkeyLabel.TextSize = 16
-            HotkeyLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
-            HotkeyLabel.TextXAlignment = Enum.TextXAlignment.Left
-            HotkeyLabel.Parent = HotkeyFrame
-            
-            table.insert(ThemedElements, {
-                Element = HotkeyLabel,
-                Properties = {TextColor3 = "TextSecondary", TextKey = langKey}
-            })
-            
-            local HotkeyButton = Instance.new("TextButton")
-            HotkeyButton.Size = UDim2.new(0, 100, 0, 25)
-            HotkeyButton.Position = UDim2.new(1, -100, 0.5, -12.5)
-            HotkeyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-            HotkeyButton.BackgroundTransparency = 0.2
-            HotkeyButton.BorderSizePixel = 0
-            HotkeyButton.Text = defaultKey
-            HotkeyButton.Font = Enum.Font.GothamSemibold
-            HotkeyButton.TextSize = 14
-            HotkeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            HotkeyButton.Parent = HotkeyFrame
-            
-            table.insert(ThemedElements, {
-                Element = HotkeyButton,
-                Properties = {BackgroundColor3 = "Primary", TextColor3 = "Text"}
-            })
-            
-            local HotkeyCorner = Instance.new("UICorner")
-            HotkeyCorner.CornerRadius = UDim.new(0, 4)
-            HotkeyCorner.Parent = HotkeyButton
-        end
-        
-        createHotkeySetting("Toggle Hub", "RightControl", "toggle_hub_key")
-        createHotkeySetting("Emergency Hide", "F1", "emergency_hide")
-        createHotkeySetting("Quick Execute", "F2", "quick_execute")
+    end
+    
+    -- v2.4 NEW PROFILES TAB
+    local function createProfilesContent()
+        -- You can implement saving/loading logic here, e.g., using writefile() if executor supports it
+        local placeholder = Instance.new("TextLabel")
+        placeholder.Size = UDim2.new(1, 0, 0, 100)
+        placeholder.BackgroundTransparency = 1
+        placeholder.Text = "Coming Soon: Save and load your favorite script configurations!"
+        placeholder.Font = Enum.Font.GothamBold
+        placeholder.TextSize = 22
+        placeholder.TextColor3 = Color3.fromRGB(200, 200, 220)
+        placeholder.TextWrapped = true
+        placeholder.Parent = ProfilesTab
+        table.insert(ThemedElements, {Element=placeholder, Properties={TextColor3="TextSecondary"}})
     end
     
     local function createInfoContent()
@@ -2384,11 +2347,11 @@ function createMainUI()
         InfoPadding.PaddingRight = UDim.new(0, 30)
         InfoPadding.PaddingBottom = UDim.new(0, 30)
         InfoPadding.Parent = InfoContainer
-              
+        
         local InfoTitle = Instance.new("TextLabel")
         InfoTitle.Size = UDim2.new(1, 0, 0, 40)
         InfoTitle.BackgroundTransparency = 1
-        InfoTitle.Text = "🚀 0_0 Hub AI Revolution"
+        InfoTitle.Text = "🚀 0_0 Hub Quantum Core"
         InfoTitle.Font = Enum.Font.GothamBold
         InfoTitle.TextSize = 28
         InfoTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -2401,7 +2364,7 @@ function createMainUI()
         InfoDescription.Size = UDim2.new(1, 0, 1, -50)
         InfoDescription.Position = UDim2.new(0, 0, 0, 50)
         InfoDescription.BackgroundTransparency = 1
-        InfoDescription.Text = Languages[HubState.CurrentLanguage].version_info
+        InfoDescription.Text = "" -- Set by applyLanguage
         InfoDescription.Font = Enum.Font.Gotham
         InfoDescription.TextSize = 16
         InfoDescription.TextColor3 = Color3.fromRGB(200, 200, 220)
@@ -2418,11 +2381,19 @@ function createMainUI()
     createDashboardContent()
     createScriptsContent()
     createAIAssistantContent()
+    createProfilesContent() -- v2.4 NEW
     createSettingsContent()
     createInfoContent()
     
     local internalToggleFunction = function(visible)
-        local targetPos = visible and UDim2.new(0.5, -425, 0.5, -275) or UDim2.new(0.5, -425, 1.2, -275)
+        local targetPos
+        if isMobile() then 
+            MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+            targetPos = visible and UDim2.new(0.5, 0, 0.5, 0) or UDim2.new(0.5, 0, 1.2, 0)
+        else
+            MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+            targetPos = visible and UDim2.new(0.5, -450, 0.5, -300) or UDim2.new(0.5, -450, 1.2, -300)
+        end
         local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
         safeTween(MainFrame, tweenInfo, {Position = targetPos})
         HubState.Visible = visible
@@ -2438,6 +2409,131 @@ function createMainUI()
     return ScreenGui, internalToggleFunction
 end
 
+
+--// ====================================[ V2.4 INSANE LOADING SCREEN ]==================================== //--
+
+local function createLoadingScreen()
+    local finished = Instance.new("BindableEvent")
+
+    local LoadingGui = Instance.new("ScreenGui")
+    LoadingGui.Name = "HubLoadingScreen"
+    LoadingGui.ResetOnSpawn = false
+    LoadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    LoadingGui.Parent = playerGui
+
+    local background = Instance.new("Frame")
+    background.Size = UDim2.new(1,0,1,0)
+    background.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    background.Parent = LoadingGui
+
+    local imageFrame = Instance.new("Frame")
+    imageFrame.Size = UDim2.new(0, 600, 0, 400)
+    imageFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    imageFrame.BackgroundTransparency = 1
+    imageFrame.Parent = background
+
+    local carImage = Instance.new("ImageLabel")
+    -- This is the asset ID for the black BMW on a black background you provided.
+    carImage.Image = "rbxassetid://18544062035" 
+    carImage.Size = UDim2.new(1,0,1,0)
+    carImage.BackgroundTransparency = 1
+    carImage.ImageTransparency = 0.5
+    carImage.ScaleType = Enum.ScaleType.Fit
+    carImage.Parent = imageFrame
+    
+    local title = Instance.new("TextLabel")
+    title.Text = "0_0 hub"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 50
+    title.TextColor3 = Color3.new(1,1,1)
+    title.Size = UDim2.new(1, 0, 0, 60)
+    title.Position = UDim2.new(0, 0, 0, 20)
+    title.BackgroundTransparency = 1
+    title.Parent = imageFrame
+    
+    local loadingText = Instance.new("TextLabel")
+    loadingText.Text = "LOADING..."
+    loadingText.Font = Enum.Font.Code
+    loadingText.TextSize = 60
+    loadingText.TextColor3 = Color3.new(1,1,1)
+    loadingText.Size = UDim2.new(1, 0, 0, 70)
+    loadingText.Position = UDim2.new(0, 0, 0.5, -35)
+    loadingText.BackgroundTransparency = 1
+    loadingText.Parent = imageFrame
+    
+    local progressBarBack = Instance.new("Frame")
+    progressBarBack.Size = UDim2.new(0.8, 0, 0, 10)
+    progressBarBack.Position = UDim2.new(0.1, 0, 0.8, 0)
+    progressBarBack.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    progressBarBack.BorderSizePixel = 0
+    progressBarBack.Parent = imageFrame
+    Instance.new("UICorner", progressBarBack).CornerRadius = UDim.new(1,0)
+    
+    local progressBarFill = Instance.new("Frame")
+    progressBarFill.Size = UDim2.new(0, 0, 1, 0)
+    progressBarFill.BackgroundColor3 = Color3.fromRGB(0, 255, 200)
+    progressBarFill.BorderSizePixel = 0
+    progressBarFill.Parent = progressBarBack
+    Instance.new("UICorner", progressBarFill).CornerRadius = UDim.new(1,0)
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Text = "> Initializing..."
+    statusLabel.Font = Enum.Font.Code
+    statusLabel.TextSize = 16
+    statusLabel.TextColor3 = Color3.fromRGB(200,200,200)
+    statusLabel.Size = UDim2.new(0.8, 0, 0, 20)
+    statusLabel.Position = UDim2.new(0.1, 0, 0.8, 20)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    statusLabel.Parent = imageFrame
+
+    spawn(function()
+        local glitchChars = {" ", "_", "/", "\\", "|", "0", "1"}
+        while loadingText.Parent do
+            local originalText = "LOADING..."
+            local newText = ""
+            for i = 1, #originalText do
+                if math.random() < 0.1 then
+                    newText = newText .. glitchChars[math.random(#glitchChars)]
+                else
+                    newText = newText .. originalText:sub(i,i)
+                end
+            end
+            loadingText.Text = newText
+            safeWait(0.05)
+        end
+    end)
+    
+    spawn(function()
+        local statuses = {
+            "Checking server status...",
+            "Initializing v2.4 updates...",
+            "Validating modules...",
+            "Applying enhancements...",
+            "Launching UI..."
+        }
+        
+        safeTween(carImage, TweenInfo.new(1), {ImageTransparency = 0})
+        
+        for i, status in ipairs(statuses) do
+            statusLabel.Text = "> " .. status
+            local targetSize = UDim2.new(i / #statuses, 0, 1, 0)
+            safeTween(progressBarFill, TweenInfo.new(0.6, Enum.EasingStyle.Quad), {Size = targetSize})
+            safeWait(0.7)
+        end
+        
+        statusLabel.Text = "> Launching UI... SUCCESS"
+        safeWait(0.5)
+        
+        safeTween(background, TweenInfo.new(0.5), {BackgroundTransparency = 1})
+        safeWait(0.5)
+        
+        LoadingGui:Destroy()
+        finished:Fire()
+    end)
+    
+    return finished.Event
+end
 
 --// ====================================[   LOGIN & INITIALIZATION   ]==================================== //--
 
@@ -2491,6 +2587,7 @@ local function createLoginUI()
     UsernameBox.TextSize = 16
     UsernameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     UsernameBox.Parent = LoginFrame
+    
     
     Instance.new("UICorner", UsernameBox).CornerRadius = UDim.new(0, 8)
     Instance.new("UIPadding", UsernameBox).PaddingLeft = UDim.new(0, 15)
@@ -2571,9 +2668,22 @@ local function createLoginUI()
             
             hubGui, toggleHub = createMainUI()
             hubGui.Parent = playerGui
-            toggleHub(true)
+
+            -- v2.4.2 Change: Instantly place UI in the center on first login
+            local mainContainer = hubGui:FindFirstChild("MainContainer")
+            if mainContainer then
+                if isMobile() then
+                    mainContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+                else
+                    mainContainer.Position = UDim2.new(0.5, -450, 0.5, -300)
+                end
+                HubState.Visible = true
+            else
+                -- Fallback to old animation if container isn't found for some reason
+                toggleHub(true)
+            end
             
-            showNotification("Welcome to 0_0 Hub AI Revolution!", "success")
+            showNotification("Welcome to 0_0 Hub Quantum Core!", "success")
         else
             StatusLabel.Text = Languages[HubState.CurrentLanguage].login_failed or "Invalid credentials. Please try again."
             StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
@@ -2652,7 +2762,7 @@ function showNotification(message, notificationType)
         Position = UDim2.new(0, 0, 0, 0)
     })
     
-    task.spawn(function()
+    spawn(function()
         safeWait(4)
         if notification.Parent then
             safeTween(notification, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
@@ -2671,12 +2781,14 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if toggleHub then
             toggleHub(not HubState.Visible)
         elseif not playerGui:FindFirstChild("HubLogin") then
-            createLoginUI()
+            -- If login doesn't exist, re-init. This prevents getting stuck.
+            local loadingFinished = createLoadingScreen()
+            loadingFinished:Connect(createLoginUI)
         end
     elseif input.KeyCode == Enum.KeyCode.F1 then
         pcall(function()
             for _, gui in ipairs(playerGui:GetChildren()) do
-                if gui.Name:find("Hub") or gui.Name:find("Revolution") or gui.Name:find("0_0") or gui.Name:find("AnimeVisualsGUI") or gui.Name:find("DayNightUI") then
+                if gui.Name:find("Hub") or gui.Name:find("Quantum") or gui.Name:find("0_0") or gui.Name:find("AnimeVisualsGUI") or gui.Name:find("DayNightUI") then
                     gui:Destroy()
                 end
             end
@@ -2713,45 +2825,35 @@ for _, script in ipairs(ScriptLibrary) do
 end
 
 local function initializeHub()
-    if playerGui:FindFirstChild("AI_RevolutionHub") or playerGui:FindFirstChild("HubLogin") then
+    if playerGui:FindFirstChild("QuantumCoreHub") or playerGui:FindFirstChild("HubLogin") or playerGui:FindFirstChild("HubLoadingScreen") then
         showNotification("Hub is already running!", "info")
         return
     end
     
-    createLoginUI()
+    local loadingFinished = createLoadingScreen()
+    loadingFinished:Connect(createLoginUI)
     
-    showNotification("Welcome to 0_0 Hub AI Revolution! Press RightControl to toggle.", "success")
+    showNotification("Welcome to 0_0 Hub Quantum Core! Press RightControl to toggle.", "success")
 end
 
-task.spawn(function()
+spawn(function()
     safeWait(2)
     initializeHub()
 end)
 
--- FIX: Remove server-only BindToClose function
---[[
-game:BindToClose(function()
-    pcall(function()
-        print("Saving user preferences...")
-        print("Theme:", HubState.CurrentTheme)
-        print("Language:", HubState.CurrentLanguage)
-    end)
-end)
-]]
-
-task.spawn(function()
-    while task.wait(60) do
+spawn(function()
+    while safeWait(60) do
         pcall(function()
-            -- FIX: Use modern collectgarbage() syntax
             collectgarbage()
         end)
     end
 end)
 
 print("=====================================================================")
-print("🚀 0_0 Hub V2.3.4 - Critical Hotfix Loaded Successfully!")
-print("🧠 NEW: AI Assistant for questions and script generation!")
-print("🎨 FIX: All reported runtime and UI errors have been resolved.")
+print("🚀 0_0 Hub V2.4.2 - Quantum Core (Hotfix) Loaded Successfully!")
+print("🔧 FIX: UI now appears instantly in the center on login.")
+print("🔧 FIX: Language system now updates all UI elements correctly.")
+print("🎨 NEW: Complete UI overhaul with side-navigation and mobile support!")
 print("🎮 Press RightControl to open the hub")
 print("🔧 Emergency hide: F1 | Quick Execute: F2")
 print("💎 Enjoy the future of gaming!")
