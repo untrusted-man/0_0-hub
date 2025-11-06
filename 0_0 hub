@@ -7,7 +7,6 @@
 --//     [IMPROVED] Toggle logic confirmed to correctly update button text and HubState upon execution success.
 --//     [IMPROVED] Increased draggable area on the Main Hub and improved loading screen centering.
 --//     [IMPROVED] Added minimize/restore functionality to Anime Visuals UI and Day/Night UI using persistent side boxes.
---//     [UPDATED] Anime Visuals UI function logic updated to use Nexus V3.0's layout while retaining Eclipse V3.1's stability wrappers.
 --//
 --//==========================================================================================================//--
 --// Core Services with Executor Compatibility
@@ -733,8 +732,8 @@ local ScriptLibrary = {
             local player = Players.LocalPlayer
             local camera = workspace.CurrentCamera
             
-            local MIN_POS_X = 1 -- Use 1 for right alignment anchor
-            local MIN_POS_Y = 1 -- Use 1 for bottom alignment anchor
+            local MIN_POS_X = 0.5
+            local MIN_POS_Y = 0.95
             
             if currentGui:FindFirstChild("AnimeVisualsGUI") then
                 currentGui.AnimeVisualsGUI:Destroy()
@@ -742,10 +741,10 @@ local ScriptLibrary = {
             
             local function destroyEffects()
                 pcall(function()
-                    if Lighting:FindFirstChild("Anime_CC") then Lighting.Anime_CC:Destroy() end
-                    if Lighting:FindFirstChild("Anime_Bloom") then Lighting.Anime_Bloom:Destroy() end
-                    if Lighting:FindFirstChild("Anime_Sun") then Lighting.Anime_Sun:Destroy() end
-                    if Lighting:FindFirstChild("Anime_DoF") then Lighting.Anime_DoF:Destroy() end
+                    Lighting.Anime_CC:Destroy(); 
+                    Lighting.Anime_Bloom:Destroy(); 
+                    Lighting.Anime_Sun:Destroy(); 
+                    Lighting.Anime_DoF:Destroy()
                 end)
             end
             
@@ -1010,7 +1009,7 @@ local ScriptLibrary = {
                 minimizedFrame = Instance.new("Frame")
                 minimizedFrame.Name = "AnimeVisualsMin"
                 minimizedFrame.Size = UDim2.new(0, 120, 0, 40)
-                minimizedFrame.Position = UDim2.new(MIN_POS_X, -5, MIN_POS_Y, -5) -- Offset from bottom right
+                minimizedFrame.Position = UDim2.new(MIN_POS_X, 0, MIN_POS_Y, 0)
                 minimizedFrame.AnchorPoint = Vector2.new(1, 1)
                 minimizedFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
                 minimizedFrame.BackgroundTransparency = 0.15
@@ -1067,8 +1066,8 @@ local ScriptLibrary = {
             local currentGui = getPlayerGui()
             if not currentGui then return false end
             
-            local MIN_POS_X = 1
-            local MIN_POS_Y = 1
+            local MIN_POS_X = 0.5
+            local MIN_POS_Y = 0.95
             
             if currentGui:FindFirstChild("DayNightUI") then
                 currentGui.DayNightUI:Destroy()
@@ -1095,7 +1094,7 @@ local ScriptLibrary = {
             
             local closeBtn = Instance.new("TextButton", mainFrame)
             closeBtn.Name = "CloseButton"
-            closeBtn.Size = UDim2.new(0,28,0,28); closeBtn.Position = UDim2.new(1,-78,0,8); closeBtn.Text = "X"; closeBtn.Font = Enum.Font.GothamBold; closeBtn.TextSize = 18; closeBtn.TextColor3 = Color3.fromRGB(255,255,255); closeBtn.BackgroundColor3 = Color3.fromRGB(80, 40, 40);
+            closeBtn.Size = UDim2.new(0,28,0,28); minBtn.Position = UDim2.new(1,-78,0,8); closeBtn.Text = "X"; closeBtn.Font = Enum.Font.GothamBold; closeBtn.TextSize = 18; closeBtn.TextColor3 = Color3.fromRGB(255,255,255); closeBtn.BackgroundColor3 = Color3.fromRGB(80, 40, 40);
             Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0,6)
             
             local sliderFrame = Instance.new("Frame", mainFrame)
@@ -1151,7 +1150,7 @@ local ScriptLibrary = {
                 minimizedFrame = Instance.new("Frame")
                 minimizedFrame.Name = "DayNightMin"
                 minimizedFrame.Size = UDim2.new(0, 120, 0, 40)
-                minimizedFrame.Position = UDim2.new(MIN_POS_X, -5, MIN_POS_Y, -50) -- Offset from bottom right, above AnimeVisualsMin
+                minimizedFrame.Position = UDim2.new(MIN_POS_X, 0, MIN_POS_Y, -50) -- Positioned above AnimeVisualsMin
                 minimizedFrame.AnchorPoint = Vector2.new(1, 1)
                 minimizedFrame.BackgroundColor3 = Color3.fromRGB(28,28,30)
                 minimizedFrame.BackgroundTransparency = 0.1
@@ -1678,7 +1677,6 @@ local ScriptLibrary = {
             local screenGui = Instance.new("ScreenGui")
             screenGui.Name = "OutfitStealerUI"
             screenGui.Parent = currentGui
-            screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
             local mainFrame = Instance.new("Frame")
             mainFrame.Size = UDim2.new(0, 250, 0, 300)
             mainFrame.Position = UDim2.new(0.5, -125, 0.5, -150)
@@ -2220,7 +2218,7 @@ local function safeExecute(func, name, state)
 end
 
 
---// ===================================![   V3.1 ECLIPSE UI CREATION    ]!==================================== //--
+--// ====================================[   V3.1 ECLIPSE UI CREATION    ]==================================== //--
 function createMainUI()
     local currentGui = getPlayerGui()
     if not currentGui then return end
@@ -2359,6 +2357,20 @@ function createMainUI()
     TopNavList.SortOrder = Enum.SortOrder.LayoutOrder
     TopNavList.Padding = UDim.new(0, 10)
     TopNavList.Parent = NavButtonContainer
+
+    -- Content Area (Right of SideBar)
+    local ContentArea = Instance.new("Frame")
+    ContentArea.Name = "ContentArea"
+    ContentArea.Size = UDim2.new(1, -80, 1, 0)
+    ContentArea.Position = UDim2.new(0, 80, 0, 0)
+    ContentArea.BackgroundTransparency = 1
+    ContentArea.Parent = MainFrame
+    local ContentPadding = Instance.new("UIPadding")
+    ContentPadding.PaddingTop = UDim.new(0, 20); ContentPadding.PaddingLeft = UDim.new(0, 20); ContentPadding.PaddingRight = UDim.new(0, 20); ContentPadding.PaddingBottom = UDim.new(0, 20)
+    ContentPadding.Parent = ContentArea
+    
+    local Tabs = {}
+    local TabButtons = {}
 
     local function createSideBarButton(name, icon, order, langKey)
         local TabButton = Instance.new("TextButton")
@@ -2965,7 +2977,7 @@ local p=game.Players.LocalPlayer; RS.Stepped:Connect(function() if p.Character t
             table.insert(ThemedElements,{Element=KeybindLabel,Properties={TextColor3="TextSecondary",TextKey=langKey}})
             local KeybindButton=Instance.new("TextButton");
             KeybindButton.Size=UDim2.new(0.4,0,0,30); KeybindButton.Position=UDim2.new(0.55,0,0,yPos); KeybindButton.BackgroundColor3=Themes[HubState.CurrentTheme].Secondary; KeybindButton.Text=HubState.Hotkeys[name].Name; KeybindButton.Font=Enum.Font.GothamSemibold; KeybindButton.TextSize=14; KeybindButton.Parent=KeybindSection
-            Instance.new("UICorner",KeybindButton).CornerRadius=UDim.new(0,10)
+            Instance.new("UICorner",KeybindButton).CornerRadius = UDim.new(0,10)
             table.insert(ThemedElements,{Element=KeybindButton,Properties={BackgroundColor3="Secondary",TextColor3="Text"}})
             KeybindButton.MouseButton1Click:Connect(function()
                 KeybindButton.Text = "..."
@@ -3086,7 +3098,7 @@ local p=game.Players.LocalPlayer; RS.Stepped:Connect(function() if p.Character t
     switchTab("Dashboard")
     return ScreenGui, internalToggleFunction
 end
---// ===================================![ V3.1 ECLIPSE LOADING SCREEN ]!==================================== //--
+--// ====================================[ V3.1 ECLIPSE LOADING SCREEN ]==================================== //--
 local function createLoadingScreen()
     local finished = Instance.new("BindableEvent")
     local LoadingGui = Instance.new("ScreenGui");
@@ -3169,7 +3181,7 @@ local function createLoadingScreen()
     end)
     return finished.Event
 end
---// ===================================![   LOGIN & INITIALIZATION   ]!==================================== //--
+--// ====================================[   LOGIN & INITIALIZATION   ]==================================== //--
 local function createLoginUI()
     local currentGui = getPlayerGui()
     if not currentGui then warn("PlayerGui inaccessible for login UI."); return end
@@ -3267,7 +3279,8 @@ local function updateNotificationUI(message, notificationType)
     local notification = Instance.new("Frame");
     notification.Size = UDim2.new(1, 0, 0, 60)
     local color = notificationType == "success" and Color3.fromRGB(100, 200, 100) or notificationType == "error" and Color3.fromRGB(200, 100, 100) or Color3.fromRGB(100, 150, 200)
-    notification.BackgroundColor3 = color; notification.BackgroundTransparency = 0.1; notification.BorderSizePixel = 0; notification.Parent = NotificationContainer
+    notification.BackgroundColor3 = color;
+    notification.BackgroundTransparency = 0.1; notification.BorderSizePixel = 0; notification.Parent = NotificationContainer
     Instance.new("UICorner", notification).CornerRadius = UDim.new(0, 12)
     local notifText = Instance.new("TextLabel");
     notifText.Size = UDim2.new(1, -20, 1, 0); notifText.Position = UDim2.new(0, 10, 0, 0); notifText.BackgroundTransparency = 1; notifText.Text = message;
