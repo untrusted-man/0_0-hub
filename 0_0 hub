@@ -1,15 +1,12 @@
---//==========================================================================================================//--
---//
---//                       0_0 Hub V3.1.6 - ECLIPSE (Absolute Final Shield)
---//
---//     [v3.1.6 CRITICAL PATCH] --//     [FINAL FIX] Implemented asynchronous UI button text updates using spawn(safeWait(0.1)) inside safeExecute to decouple the button refresh logic from the immediate script execution, bypassing the CoreGui/Locales crash on button updates.
---//     [IMPROVED] Core script flow is now completely isolated and designed to prevent crashes on activation.
---//     [IMPROVED] Toggle logic confirmed to correctly update button text and HubState upon execution success.
---//     [IMPROVED] Increased draggable area on the Main Hub and improved loading screen centering.
---//     [IMPROVED] Added minimize/restore functionality to Anime Visuals UI and Day/Night UI using persistent side boxes.
---//
---//==========================================================================================================//--
---// Core Services with Executor Compatibility
+--[[
+    0_0 Hub v3.2 - Phantom Update
+
+    - BMW-black Phantom loading screen
+    - AnimeVisuals restored from v3.0.2
+    - New Performance Mode for extreme FPS (400+ possible on strong PCs)
+    - Tabs, login, and overall layout preserved from v3.1
+]]
+
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -69,7 +66,7 @@ print("🔍 Detected Executor:", currentExecutor)
 local HubState = {
     Visible = false,
     CurrentTab = "Dashboard",
-    CurrentTheme = "Eclipse", -- v3.1 NEW DEFAULT THEME
+    CurrentTheme = "Phantom", -- v3.1 NEW DEFAULT THEME
     CurrentLanguage = "en",
     Draggable = false,
     DragStart = nil,
@@ -105,7 +102,7 @@ local HubState = {
 --// Enhanced Localization System (8 Languages)
 local Languages = {
     en = {
-        hub_title = "0_0 Hub // v3.1 Eclipse",
+        hub_title = "0_0 Hub // v3.2 Phantom",
         dashboard_tab = "Dashboard",
         scripts_tab = "Scripts",
         plugins_tab = "Plugins", 
@@ -116,7 +113,7 @@ local Languages = {
         close_tooltip = "Close Hub",
         minimize_tooltip = "Minimize Hub",
         dashboard_welcome = "Welcome back, ",
-        dashboard_subtitle = "Eclipse systems online.",
+        dashboard_subtitle = "Phantom systems online.",
         performance_title = "System Performance",
         featured_script = "Featured Script",
         fps_label = "FPS",
@@ -153,7 +150,8 @@ local Languages = {
         walk_on_water = "💧 Walk on Water", 
         player_notifier = "🔔 Player Notifier", 
         auto_farm_example = "🤖 Auto Farm (Example)", 
-        ai_welcome_message = "Hello!\nI am the 0_0 Hub Eclipse AI. How can I assist you today?",
+        performance_mode = "⚙️ Performance Mode (FPS Boost)",
+        ai_welcome_message = "Hello!\nI am the 0_0 Hub Phantom AI. How can I assist you today?",
         ai_input_placeholder = "Ask me to toggle scripts, explain features, or generate code...",
         ai_generating_script = "Understood.\nGenerating the requested script...",
         ai_toggling_script = "Acknowledged.\nToggling script: ", 
@@ -183,10 +181,10 @@ local Languages = {
         plugin_loaded = "Plugin loaded successfully!", 
         plugin_failed = "Failed to load plugin.\nCheck the script source.", 
         plugin_placeholder = "Paste plugin script source here...", 
-        version_info = "Hub Version: 3.1.6 Eclipse\nLast Updated: November 5, 2025\n\nThe Eclipse update introduces a major visual overhaul with a robust left-sidebar navigation, a sleek new default theme, and improved script stability for a seamless user experience.\nThis patch ensures CoreGui compatibility."
+        version_info = "Hub Version: 3.2 Phantom\nLast Updated: December 2, 2025\n\nThe Phantom update restores Anime Visuals, adds a BMW-black Phantom loading screen, and introduces Performance Mode for extreme FPS while preserving the classic 0_0 Hub layout.\nCore systems updated for stability."
     },
     es = {
-        hub_title = "Centro 0_0 // v3.1 Eclipse",
+        hub_title = "Centro 0_0 // v3.1 Phantom",
         dashboard_tab = "Panel",
         scripts_tab = "Scripts",
         plugins_tab = "Plugins",
@@ -199,13 +197,13 @@ local Languages = {
         username_placeholder = "Ingresa usuario",
         password_placeholder = "Ingresa contraseña",
         login_button = "Acceder al Hub",
-        version_info = "Versión del Hub: 3.1.6 Eclipse\nÚltima Actualización: 5 de noviembre de 2025",
+        version_info = "Versión del Hub: 3.2 Phantom\nÚltima Actualización: 5 de noviembre de 2025",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Remover Niebla",
         teleport_to_player = "📍 Teleportar a Jugador"
     },
     fr = {
-        hub_title = "Centre 0_0 // v3.1 Eclipse",
+        hub_title = "Centre 0_0 // v3.1 Phantom",
         dashboard_tab = "Tableau de bord",
         scripts_tab = "Scripts",
         plugins_tab = "Plugins",
@@ -218,13 +216,13 @@ local Languages = {
         username_placeholder = "Nom d'utilisateur",
         password_placeholder = "Mot de passe",
         login_button = "Accéder au Hub",
-        version_info = "Version du Hub : 3.1.6 Eclipse\nDernière Mise à jour : 5 novembre 2025",
+        version_info = "Version du Hub : 3.2 Phantom\nDernière Mise à jour : 5 novembre 2025",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Supprimer le Brouillard",
         teleport_to_player = "📍 Téléporter vers le Joueur"
     },
     de = {
-        hub_title = "0_0 Hub // v3.1 Eclipse",
+        hub_title = "0_0 Hub // v3.2 Phantom",
         dashboard_tab = "Dashboard",
         scripts_tab = "Skripte",
         plugins_tab = "Plugins",
@@ -237,13 +235,13 @@ local Languages = {
         username_placeholder = "Benutzername eingeben",
         password_placeholder = "Passwort eingeben",
         login_button = "Hub öffnen",
-        version_info = "Hub-Version: 3.1.6 Eclipse\nLetztes Update: 5. November 2025",
+        version_info = "Hub-Version: 3.2 Phantom\nLetztes Update: 5. November 2025",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Nebel Entfernen",
         teleport_to_player = "📍 Zu Spieler Teleportieren"
     },
     pt = {
-        hub_title = "Centro 0_0 // v3.1 Eclipse",
+        hub_title = "Centro 0_0 // v3.1 Phantom",
         dashboard_tab = "Painel",
         scripts_tab = "Scripts",
         plugins_tab = "Plugins",
@@ -256,13 +254,13 @@ local Languages = {
         username_placeholder = "Digite o usuário",
         password_placeholder = "Digite a senha",
         login_button = "Acessar Hub",
-        version_info = "Versão do Hub: 3.1.6 Eclipse\nÚltima Atualização: 5 de novembro de 2025",
+        version_info = "Versão do Hub: 3.2 Phantom\nÚltima Atualização: 5 de novembro de 2025",
         fullbright = "💡 Fullbright",
         remove_fog = "🌫️ Remover Névoa",
         teleport_to_player = "📍 Teleportar para Jogador"
     },
     ru = {
-        hub_title = "Центр 0_0 // v3.1 Eclipse",
+        hub_title = "Центр 0_0 // v3.1 Phantom",
         dashboard_tab = "Панель",
         scripts_tab = "Скрипты",
         plugins_tab = "Плагины",
@@ -275,13 +273,13 @@ local Languages = {
         username_placeholder = "Введите имя пользователя",
         password_placeholder = "Введите пароль",
         login_button = "Войти в Hub",
-        version_info = "Версия Хаба: 3.1.6 Eclipse\nПоследнее Обновление: 5 ноября 2025",
+        version_info = "Версия Хаба: 3.2 Phantom\nПоследнее Обновление: 5 ноября 2025",
         fullbright = "💡 Полная Яркость",
         remove_fog = "🌫️ Удалить Туман",
         teleport_to_player = "📍 Телепорт к Игроку"
     },
     ja = {
-        hub_title = "0_0 ハブ // v3.1 Eclipse",
+        hub_title = "0_0 ハブ // v3.1 Phantom",
         dashboard_tab = "ダッシュボード",
         scripts_tab = "スクリプト",
         plugins_tab = "プラグイン",
@@ -294,13 +292,13 @@ local Languages = {
         username_placeholder = "ユーザー名を入力",
         password_placeholder = "パスワードを入力",
         login_button = "ハブにアクセス",
-        version_info = "ハブバージョン: 3.1.6 Eclipse\n最終更新: 2025年11月5日",
+        version_info = "ハブバージョン: 3.2 Phantom\n最終更新: 2025年11月5日",
         fullbright = "💡 フルブライト",
         remove_fog = "🌫️ 霧を除去",
         teleport_to_player = "📍 プレイヤーへテレポート"
     },
     ko = {
-        hub_title = "0_0 허브 // v3.1 Eclipse",
+        hub_title = "0_0 허브 // v3.1 Phantom",
         dashboard_tab = "대시보드",
         scripts_tab = "스크립트",
         plugins_tab = "플러그인",
@@ -313,12 +311,12 @@ local Languages = {
         username_placeholder = "사용자명 입력",
         password_placeholder = "비밀번호 입력",
         login_button = "허브 접속",
-        version_info = "허브 버전: 3.1.6 Eclipse\n마지막 업데이트: 2025년 11월 5일"
+        version_info = "허브 버전: 3.2 Phantom\n마지막 업데이트: 2025년 11월 5일"
     }
 }
---// Premium Theme System (16 Themes) - Added 'Eclipse' for v3.1
+--// Premium Theme System (16 Themes) - Added 'Phantom' for v3.1
 local Themes = {
-    Eclipse = { -- v3.1 NEW DEFAULT THEME
+    Phantom = { -- v3.1 NEW DEFAULT THEME
         Background = Color3.fromRGB(8, 8, 12),
         BackgroundTransparency = 0.05,
         Secondary = Color3.fromRGB(18, 18, 28),
@@ -722,32 +720,16 @@ local ScriptLibrary = {
         premium = false,
         description = "Anime-style visuals with a UI for customization",
         func = function()
-            local currentGui = getPlayerGui()
-            if not currentGui then return false end
-
             local Players = game:GetService("Players")
             local Lighting = game:GetService("Lighting")
             local TweenService = game:GetService("TweenService")
             local UserInputService = game:GetService("UserInputService")
             local player = Players.LocalPlayer
+            local playerGui = player:WaitForChild("PlayerGui")
             local camera = workspace.CurrentCamera
-            
-            local MIN_POS_X = 0.5
-            local MIN_POS_Y = 0.95
-            
-            if currentGui:FindFirstChild("AnimeVisualsGUI") then
-                currentGui.AnimeVisualsGUI:Destroy()
+            if playerGui:FindFirstChild("AnimeVisualsGUI") then
+                playerGui.AnimeVisualsGUI:Destroy()
             end
-            
-            local function destroyEffects()
-                pcall(function()
-                    Lighting.Anime_CC:Destroy(); 
-                    Lighting.Anime_Bloom:Destroy(); 
-                    Lighting.Anime_Sun:Destroy(); 
-                    Lighting.Anime_DoF:Destroy()
-                end)
-            end
-            
             local function createEffect(class, name, props)
                 local e = Lighting:FindFirstChild(name) or Instance.new(class)
                 e.Name = name
@@ -759,7 +741,6 @@ local ScriptLibrary = {
                 end
                 return e
             end
-            
             local cc = createEffect("ColorCorrectionEffect", "Anime_CC", {
                 Enabled = true,
                 Brightness = 0,
@@ -783,18 +764,14 @@ local ScriptLibrary = {
                 InFocusRadius = 12,
                 FarIntensity = 0.7
             })
-            
             local function tween(obj, props, t)
-                safeTween(obj, TweenInfo.new(t or 0.3, Enum.EasingStyle.Sine), props)
+                TweenService:Create(obj, TweenInfo.new(t or 0.3, Enum.EasingStyle.Sine), props):Play()
             end
-            
             local gui = Instance.new("ScreenGui")
             gui.Name = "AnimeVisualsGUI"
             gui.ResetOnSpawn = false
-            gui.Parent = currentGui
-            
+            gui.Parent = playerGui
             local main = Instance.new("Frame")
-            main.Name = "MainFrame"
             main.Size = UDim2.new(0, 420, 0, 360)
             main.Position = UDim2.new(0.5, -210, 0.85, -180)
             main.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -805,7 +782,6 @@ local ScriptLibrary = {
             main.Active = true
             main.Draggable = true
             Instance.new("UICorner", main).CornerRadius = UDim.new(0, 18)
-            
             local title = Instance.new("TextLabel")
             title.Size = UDim2.new(1, -40, 0, 40)
             title.Position = UDim2.new(0, 20, 0, 0)
@@ -816,7 +792,6 @@ local ScriptLibrary = {
             title.TextColor3 = Color3.fromRGB(250, 240, 255)
             title.TextXAlignment = Enum.TextXAlignment.Left
             title.Parent = main
-            
             local closeBtn = Instance.new("TextButton")
             closeBtn.Size = UDim2.new(0, 32, 0, 32)
             closeBtn.Position = UDim2.new(1, -40, 0, 8)
@@ -827,19 +802,6 @@ local ScriptLibrary = {
             closeBtn.TextSize = 16
             closeBtn.Parent = main
             Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
-            
-            local minBtn = Instance.new("TextButton")
-            minBtn.Name = "MinimizeButton"
-            minBtn.Size = UDim2.new(0, 32, 0, 32)
-            minBtn.Position = UDim2.new(1, -75, 0, 8)
-            minBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-            minBtn.Text = "—"
-            minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            minBtn.Font = Enum.Font.GothamBold
-            minBtn.TextSize = 16
-            minBtn.Parent = main
-            Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 8)
-
             local toggle = Instance.new("TextButton")
             toggle.Size = UDim2.new(0, 120, 0, 28)
             toggle.Position = UDim2.new(0.5, -60, 1, -40)
@@ -851,18 +813,15 @@ local ScriptLibrary = {
             toggle.TextSize = 14
             toggle.Parent = main
             Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 8)
-            
             local content = Instance.new("Frame")
             content.Size = UDim2.new(1, -20, 1, -110)
             content.Position = UDim2.new(0, 10, 0, 50)
             content.BackgroundTransparency = 1
             content.Parent = main
-            
             local presets = Instance.new("Frame")
             presets.Size = UDim2.new(1, 0, 0, 36)
             presets.BackgroundTransparency = 1
             presets.Parent = content
-            
             local function makePreset(x, text, color)
                 local b = Instance.new("TextButton")
                 b.Size = UDim2.new(0.3, 0, 1, 0)
@@ -876,21 +835,17 @@ local ScriptLibrary = {
                 Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
                 return b
             end
-            
             local p1 = makePreset(0.0, "Pastel", Color3.fromRGB(150, 100, 200))
             local p2 = makePreset(0.35, "Contrast", Color3.fromRGB(100, 180, 240))
             local p3 = makePreset(0.7, "Sunset", Color3.fromRGB(255, 120, 120))
-            
             local y = 50
             local draggingSlider = nil
-            
             local function createSlider(labelText, min, max, default, callback)
                 local container = Instance.new("Frame")
                 container.Size = UDim2.new(1, 0, 0, 46)
                 container.Position = UDim2.new(0, 0, 0, y)
                 container.BackgroundTransparency = 1
                 container.Parent = content
-                
                 local label = Instance.new("TextLabel")
                 label.Size = UDim2.new(0.4, 0, 1, -14)
                 label.BackgroundTransparency = 1
@@ -900,7 +855,6 @@ local ScriptLibrary = {
                 label.TextSize = 14
                 label.TextXAlignment = Enum.TextXAlignment.Left
                 label.Parent = container
-                
                 local bar = Instance.new("Frame")
                 bar.Size = UDim2.new(0.55, 0, 0, 6)
                 bar.Position = UDim2.new(0.42, 0, 0.6, 0)
@@ -908,14 +862,12 @@ local ScriptLibrary = {
                 bar.BorderSizePixel = 0
                 bar.Parent = container
                 Instance.new("UICorner", bar).CornerRadius = UDim.new(0, 4)
-                
                 local fill = Instance.new("Frame")
                 fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
                 fill.BackgroundColor3 = Color3.fromRGB(180, 120, 230)
                 fill.BorderSizePixel = 0
                 fill.Parent = bar
                 Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 4)
-                
                 local knob = Instance.new("Frame")
                 knob.Size = UDim2.new(0, 12, 0, 12)
                 knob.Position = UDim2.new(fill.Size.X.Scale, -6, 0.5, -6)
@@ -923,14 +875,12 @@ local ScriptLibrary = {
                 knob.BorderSizePixel = 0
                 knob.Parent = bar
                 Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
-                
                 local function updateFromX(x)
                     local rel = math.clamp((x - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
                     fill.Size = UDim2.new(rel, 0, 1, 0)
                     knob.Position = UDim2.new(rel, -6, 0.5, -6)
                     callback(min + (max - min) * rel)
                 end
-                
                 knob.InputBegan:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 then
                         draggingSlider = { update = updateFromX }
@@ -945,22 +895,16 @@ local ScriptLibrary = {
                 y = y + 50
                 callback(default)
             end
-            
             UserInputService.InputChanged:Connect(function(input)
-                pcall(function() -- Pcall for input event stability
-                    if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
-                        draggingSlider.update(input.Position.X)
-                    end
-                end)
+                if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    draggingSlider.update(input.Position.X)
+                end
             end)
             UserInputService.InputEnded:Connect(function(input)
-                pcall(function() -- Pcall for input event stability
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        draggingSlider = nil
-                    end
-                end)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingSlider = nil
+                end
             end)
-            
             createSlider("Saturation", -1, 2, 0.3, function(v)
                 cc.Saturation = v
             end)
@@ -973,20 +917,15 @@ local ScriptLibrary = {
             createSlider("FOV", 50, 100, 70, function(v)
                 camera.FieldOfView = v
             end)
-            
             local function applyPreset(id)
                 if id == 1 then
-                    cc.Saturation = 0.6; cc.Contrast = 0.15;
-                    bloom.Intensity = 1; camera.FieldOfView = 75
+                    cc.Saturation = 0.6; cc.Contrast = 0.15; bloom.Intensity = 1; camera.FieldOfView = 75
                 elseif id == 2 then
-                    cc.Saturation = -0.1;
-                    cc.Contrast = 0.6; bloom.Intensity = 1.6; camera.FieldOfView = 68
+                    cc.Saturation = -0.1; cc.Contrast = 0.6; bloom.Intensity = 1.6; camera.FieldOfView = 68
                 elseif id == 3 then
-                    cc.Saturation = 0.3;
-                    cc.Contrast = 0.2; bloom.Intensity = 1.4; camera.FieldOfView = 72
+                    cc.Saturation = 0.3; cc.Contrast = 0.2; bloom.Intensity = 1.4; camera.FieldOfView = 72
                 end
             end
-            
             p1.MouseButton1Click:Connect(function()
                 applyPreset(1)
             end)
@@ -996,66 +935,94 @@ local ScriptLibrary = {
             p3.MouseButton1Click:Connect(function()
                 applyPreset(3)
             end)
-            
             local enabled = true
             toggle.MouseButton1Click:Connect(function()
                 enabled = not enabled
                 toggle.Text = enabled and "Disable" or "Enable"
                 cc.Enabled, bloom.Enabled, sun.Enabled, dof.Enabled = enabled, enabled, enabled, enabled
             end)
-            
-            local minimizedFrame
-            local function createMinimizedFrame(mainGui)
-                minimizedFrame = Instance.new("Frame")
-                minimizedFrame.Name = "AnimeVisualsMin"
-                minimizedFrame.Size = UDim2.new(0, 120, 0, 40)
-                minimizedFrame.Position = UDim2.new(MIN_POS_X, 0, MIN_POS_Y, 0)
-                minimizedFrame.AnchorPoint = Vector2.new(1, 1)
-                minimizedFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-                minimizedFrame.BackgroundTransparency = 0.15
-                minimizedFrame.BorderSizePixel = 0
-                minimizedFrame.Parent = gui
-                minimizedFrame.Active = true
-                minimizedFrame.Draggable = true
-                Instance.new("UICorner", minimizedFrame).CornerRadius = UDim.new(0, 10)
-                
-                local minText = Instance.new("TextLabel")
-                minText.Size = UDim2.new(1, 0, 1, 0)
-                minText.BackgroundTransparency = 1
-                minText.Text = "🌸 Anime Visuals"
-                minText.Font = Enum.Font.GothamBold
-                minText.TextSize = 14
-                minText.TextColor3 = Color3.fromRGB(250, 240, 255)
-                minText.Parent = minimizedFrame
-                
-                minimizedFrame.MouseButton1Click:Connect(function()
-                    mainGui.Visible = true
-                    safeTween(mainGui, TweenInfo.new(0.3, Enum.EasingStyle.Quad), { Position = UDim2.new(0.5, -210, 0.5, -180) })
-                    minimizedFrame:Destroy()
-                end)
-            end
-            
             closeBtn.MouseButton1Click:Connect(function()
                 gui:Destroy()
-                destroyEffects()
-                if minimizedFrame then minimizedFrame:Destroy() end
-            end)
-            
-            minBtn.MouseButton1Click:Connect(function()
-                safeTween(main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), { Position = UDim2.new(0.5, -210, 1.2, 0) })
-                spawn(function()
-                    safeWait(0.3)
-                    main.Visible = false
-                    createMinimizedFrame(main)
+                pcall(function()
+                    Lighting.Anime_CC:Destroy(); Lighting.Anime_Bloom:Destroy(); Lighting.Anime_Sun:Destroy(); Lighting.Anime_DoF:Destroy()
                 end)
             end)
-            
             main.Position = UDim2.new(0.5, -210, 1.2, 0)
-            tween(main, { Position = UDim2.new(0.5, -210, 0.5, -180) }, 0.6) -- Centered on open
-            
-            return true
+            tween(main, { Position = UDim2.new(0.5, -210, 0.85, -180) }, 0.6)
         end
     },
+
+{
+    name = "performance_mode",
+    category = "utility",
+    isToggle = true,
+    premium = false,
+    description = "Performance Mode: aggressively lowers graphics and disables heavy effects for maximum FPS (400+ possible on strong PCs).",
+    func = function(state)
+        local Lighting = game:GetService("Lighting")
+        local success, RenderSettings = pcall(function()
+            return settings():GetService("RenderSettings")
+        end)
+
+        if state then
+            local backup = {
+                quality = success and RenderSettings and RenderSettings.QualityLevel or nil,
+                globalShadows = Lighting.GlobalShadows,
+                fogEnd = Lighting.FogEnd,
+                brightness = Lighting.Brightness,
+                environmentDiffuseScale = Lighting.EnvironmentDiffuseScale,
+                environmentSpecularScale = Lighting.EnvironmentSpecularScale,
+                effects = {}
+            }
+
+            for _, child in ipairs(Lighting:GetChildren()) do
+                if child:IsA("PostEffect") then
+                    backup.effects[child.Name] = child.Enabled
+                    child.Enabled = false
+                end
+            end
+
+            if success and RenderSettings then
+                pcall(function()
+                    RenderSettings.QualityLevel = Enum.QualityLevel.Level01
+                end)
+            end
+
+            Lighting.GlobalShadows = false
+            Lighting.FogEnd = 1e9
+            Lighting.Brightness = 1
+            Lighting.EnvironmentDiffuseScale = 0
+            Lighting.EnvironmentSpecularScale = 0
+
+            HubState.ActiveScripts.performance_mode = backup
+            showNotification("Performance Mode enabled - graphics minimized for max FPS.", "success")
+        else
+            local backup = HubState.ActiveScripts.performance_mode
+            if backup then
+                if success and RenderSettings and backup.quality then
+                    pcall(function()
+                        RenderSettings.QualityLevel = backup.quality
+                    end)
+                end
+
+                Lighting.GlobalShadows = backup.globalShadows
+                Lighting.FogEnd = backup.fogEnd
+                Lighting.Brightness = backup.brightness
+                Lighting.EnvironmentDiffuseScale = backup.environmentDiffuseScale
+                Lighting.EnvironmentSpecularScale = backup.environmentSpecularScale
+
+                for _, child in ipairs(Lighting:GetChildren()) do
+                    if child:IsA("PostEffect") and backup.effects[child.Name] ~= nil then
+                        child.Enabled = backup.effects[child.Name]
+                    end
+                end
+            end
+
+            HubState.ActiveScripts.performance_mode = nil
+            showNotification("Performance Mode disabled - original graphics restored.", "info")
+        end
+    end
+},
     {
         name = "day_night_cycle",
         category = "visuals",
@@ -1632,109 +1599,146 @@ local ScriptLibrary = {
         end
     },
     {
-        name = "server_hop",
-        category = "utility",
-        isToggle = false,
-        premium = true,
-        description = "Finds a new, small server to join.",
-        func = function()
-            local success, servers = pcall(function()
-                return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+        
+       {
+    name = "server_hop",
+    icon = "🌐",
+    category = "utility",
+    isToggle = false,
+    premium = true,
+    description = "Finds a server with good ping and medium population.",
+
+    func = function()
+        local HttpService = game:GetService("HttpService")
+        local TeleportService = game:GetService("TeleportService")
+        local gameId = game.PlaceId
+
+        local bestServer = nil
+        local nextCursor = ""
+        local scans = 0
+
+        showNotification("Scanner: Searching server list...", "info")
+
+        repeat
+            scans += 1
+            local url = "https://games.roblox.com/v1/games/"..gameId.."/servers/Public?limit=100&cursor="..nextCursor
+            local success, data = pcall(function()
+                return HttpService:JSONDecode(game:HttpGet(url))
             end)
-            if not success then
-                showNotification("Failed to fetch servers.", "error")
-                return false
-            end
-            local validServers = {}
-            for _, server in ipairs(servers.data) do
-                if type(server) == "table" and server.playing < server.maxPlayers and server.id ~= game.JobId and server.playing > 0 then
-                    table.insert(validServers, server)
+
+            if success and data and data.data then
+                for _, server in ipairs(data.data) do
+                    
+                    if server.id ~= game.JobId and server.ping and server.playing then
+                        local fill = server.playing / server.maxPlayers
+
+                        if fill >= 0.40 and fill <= 0.85 and server.ping <= 140 then
+                            if not bestServer or server.ping < bestServer.ping then
+                                bestServer = server
+                            end
+                        end
+                    end
+
                 end
-            end
-            if #validServers > 0 then
-                showNotification("Found a server with " .. validServers[1].playing .. " players!\nTeleporting...", "success")
-                TeleportService:TeleportToPlaceInstance(game.PlaceId, validServers[1].id, player)
-                return true
+
+                nextCursor = data.nextPageCursor or ""
             else
-                showNotification("No suitable servers found.", "error")
-                return false
+                break
             end
+
+        until nextCursor == "" or scans >= 4
+
+        if bestServer then
+            showNotification("Joining server: "..bestServer.ping.."ms • "..bestServer.playing.."/"..bestServer.maxPlayers, "success")
+            TeleportService:TeleportToPlaceInstance(gameId, bestServer.id, Players.LocalPlayer)
+        else
+            showNotification("No suitable servers found.", "error")
         end
+
+        return true
+    end
     },
     {
-        name = "outfit_stealer",
-        category = "fun",
-        isToggle = false,
-        premium = true,
-        description = "NOTE: Cannot apply outfits due to Roblox security.\nThis is a UI template.",
-        func = function()
-            local currentGui = getPlayerGui()
-            if not currentGui then return false end
+        
+       {
+    name = "avatar_previewer",
+    icon = "🧍‍♂️",
+    category = "utility",
+    isToggle = false,
+    premium = false,
+    description = "Preview any player's avatar safely.",
 
-            if currentGui:FindFirstChild("OutfitStealerUI") then
-                currentGui.OutfitStealerUI:Destroy()
-            end
-            local screenGui = Instance.new("ScreenGui")
-            screenGui.Name = "OutfitStealerUI"
-            screenGui.Parent = currentGui
-            local mainFrame = Instance.new("Frame")
-            mainFrame.Size = UDim2.new(0, 250, 0, 300)
-            mainFrame.Position = UDim2.new(0.5, -125, 0.5, -150)
-            mainFrame.AnchorPoint = Vector2.new(0.5, 0.5) -- Ensure centering
-            mainFrame.BackgroundColor3 = Themes[HubState.CurrentTheme].Primary
-            mainFrame.BorderSizePixel = 0
-            mainFrame.Parent = screenGui
-            Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 16)
-            local title = Instance.new("TextLabel")
-            title.Size = UDim2.new(1, 0, 0, 40)
-            title.BackgroundTransparency = 1
-            title.Text = "Select Player Outfit"
-            title.Font = Enum.Font.GothamBold
-            title.TextSize = 18
-            title.TextColor3 = Themes[HubState.CurrentTheme].Text
-            title.Parent = mainFrame
-            local closeBtn = Instance.new("TextButton")
-            closeBtn.Size = UDim2.new(0, 25, 0, 25); closeBtn.Position=UDim2.new(1,-30,0,8); closeBtn.Text="X"; closeBtn.Font=Enum.Font.GothamBold; closeBtn.TextColor3=Themes[HubState.CurrentTheme].Text
-            closeBtn.BackgroundTransparency = 1; closeBtn.Parent=mainFrame
-            closeBtn.MouseButton1Click:Connect(function()
-                screenGui:Destroy()
-            end)
-            local scroll = Instance.new("ScrollingFrame")
-            scroll.Size = UDim2.new(1, -20, 1, -50)
-            scroll.Position = UDim2.new(0, 10, 0, 40)
-            scroll.BackgroundTransparency = 1
-            scroll.BorderSizePixel = 0
-            scroll.Parent = mainFrame
-            local list = Instance.new("UIListLayout")
-            list.Padding = UDim.new(0, 5)
-            list.Parent = scroll
-            for _, targetPlayer in ipairs(Players:GetPlayers()) do
-                if targetPlayer ~= player and targetPlayer.Character then
-                    local button = Instance.new("TextButton")
-                    button.Size = UDim2.new(1, 0, 0, 35)
-                    button.BackgroundColor3 = Themes[HubState.CurrentTheme].Secondary
-                    button.Text = targetPlayer.DisplayName
-                    button.Font = Enum.Font.Gotham
-                    button.TextColor3 = Themes[HubState.CurrentTheme].TextSecondary
-                    button.Parent = scroll
-                    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 12)
-                    button.MouseButton1Click:Connect(function()
-                        local success, desc = pcall(function()
-                            return Players:GetHumanoidDescriptionFromUserId(targetPlayer.UserId)
-                        end)
-                        if success then
-                            -- player.Character.Humanoid:ApplyDescription(desc) -- Disabled due to Roblox security.
-                            showNotification("Cannot apply outfit (client-side restriction).", "error")
-                            screenGui:Destroy()
-                        else
-                            showNotification("Failed to fetch outfit description for " .. targetPlayer.DisplayName, "error")
-                        end
-                    end)
-                end
-            end
-            return true
+    func = function()
+        local ui = getPlayerGui()
+        if not ui then return false end
+
+        if ui:FindFirstChild("AvatarPreviewerUI") then
+            ui.AvatarPreviewerUI:Destroy()
         end
-    },
+
+        local screenGui = Instance.new("ScreenGui", ui)
+        screenGui.Name = "AvatarPreviewerUI"
+        screenGui.ResetOnSpawn = false
+
+        local frame = Instance.new("Frame", screenGui)
+        frame.Size = UDim2.new(0, 300, 0, 250)
+        frame.Position = UDim2.new(0.5, -150, 0.5, -125)
+        frame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+        frame.BorderSizePixel = 0
+        Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+        local title = Instance.new("TextLabel", frame)
+        title.Size = UDim2.new(1, 0, 0, 40)
+        title.Text = "🧍‍♂️ Avatar Previewer"
+        title.Font = Enum.Font.GothamBold
+        title.TextSize = 18
+        title.BackgroundTransparency = 1
+        title.TextColor3 = Color3.new(1,1,1)
+
+        local box = Instance.new("TextBox", frame)
+        box.Size = UDim2.new(1, -20, 0, 35)
+        box.Position = UDim2.new(0,10,0,50)
+        box.PlaceholderText = "Enter player name"
+        box.BackgroundColor3 = Color3.fromRGB(50,50,70)
+        box.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", box).CornerRadius = UDim.new(0,8)
+
+        local viewport = Instance.new("ViewportFrame", frame)
+        viewport.Size = UDim2.new(1, -20, 0, 120)
+        viewport.Position = UDim2.new(0,10,0,95)
+        viewport.BackgroundColor3 = Color3.fromRGB(20,20,30)
+        viewport.CurrentCamera = Instance.new("Camera", viewport)
+        Instance.new("UICorner", viewport).CornerRadius = UDim.new(0,8)
+
+        local button = Instance.new("TextButton", frame)
+        button.Size = UDim2.new(1, -20, 0, 35)
+        button.Position = UDim2.new(0,10,1,-45)
+        button.Text = "Preview"
+        button.BackgroundColor3 = Color3.fromRGB(60,80,150)
+        button.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", button).CornerRadius = UDim.new(0,8)
+
+        button.MouseButton1Click:Connect(function()
+            local target = Players:FindFirstChild(box.Text)
+            if not target then
+                showNotification("Player not found.", "error")
+                return
+            end
+
+            for _, child in ipairs(viewport:GetChildren()) do
+                if child:IsA("Model") then child:Destroy() end
+            end
+
+            local desc = Players:GetHumanoidDescriptionFromUserId(target.UserId)
+            local model = Players:CreateHumanoidModelFromDescription(desc, Enum.HumanoidRigType.R15)
+            model.Parent = viewport
+
+            local cam = viewport.CurrentCamera
+            local pos = model:GetPivot().Position
+            cam.CFrame = CFrame.new(pos + Vector3.new(0, 2, 10), pos)
+        end)
+    end
+},
     --// v3.0 NEW SCRIPTS
     {
         name = "walk_on_water",
@@ -1772,15 +1776,69 @@ local ScriptLibrary = {
         end
     },
     {
+        
         name = "player_notifier",
         category = "utility",
-        isToggle = false,
+        isToggle = true,
         premium = true,
-        description = "Notifies you when a specific player joins.",
-        func = function()
-            -- UI to get player name
-            showNotification("Player Notifier script needs a UI.\nThis is a placeholder.", "info")
-            return true
+        description = "Notify when players join, get close, or look at you.",
+        func = function(state)
+            local Players = game:GetService("Players")
+            local RunService = game:GetService("RunService")
+            local localPlayer = Players.LocalPlayer
+
+            if state then
+                -- Connections table
+                local connections = {}
+
+                -- Join notification
+                connections.playerAdded = Players.PlayerAdded:Connect(function(p)
+                    showNotification("Player joined: " .. p.Name, "info")
+                end)
+
+                -- Proximity + facing detector
+                connections.heartbeat = RunService.Heartbeat:Connect(function()
+                    local char = localPlayer.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    if not hrp then return end
+
+                    for _, p in ipairs(Players:GetPlayers()) do
+                        if p ~= localPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                            local otherHRP = p.Character.HumanoidRootPart
+                            local distance = (otherHRP.Position - hrp.Position).Magnitude
+
+                            -- Proximity alert
+                            if distance < 50 then
+                                showNotification(p.Name .. " is near you (" .. math.floor(distance) .. " studs).", "info")
+                            end
+
+                            -- Facing-towards-you alert (simple dot check)
+                            local dirToYou = (hrp.Position - otherHRP.Position).Unit
+                            local look = otherHRP.CFrame.LookVector
+                            local dot = look:Dot(dirToYou)
+                            if dot > 0.8 and distance < 80 then
+                                showNotification(p.Name .. " is looking at you.", "info")
+                            end
+                        end
+                    end
+                end)
+
+                HubState.ActiveScripts.player_notifier = connections
+                showNotification("Player Notifier enabled.", "success")
+                return true
+            else
+                local connections = HubState.ActiveScripts.player_notifier
+                if connections then
+                    for _, conn in pairs(connections) do
+                        if conn.Disconnect then
+                            conn:Disconnect()
+                        end
+                    end
+                end
+                HubState.ActiveScripts.player_notifier = nil
+                showNotification("Player Notifier disabled.", "info")
+                return true
+            end
         end
     },
     {
@@ -2189,8 +2247,8 @@ local function safeExecute(func, name, state)
                 safeWait(0.1) -- Small delay to bypass the rendering conflict
                 local currentGui = getPlayerGui()
                 local button
-                if currentGui and currentGui:FindFirstChild("EclipseHub") then
-                    local scriptsTab = currentGui.EclipseHub.MainContainer.ContentArea.ScriptsContent
+                if currentGui and currentGui:FindFirstChild("PhantomHub") then
+                    local scriptsTab = currentGui.PhantomHub.MainContainer.ContentArea.ScriptsContent
                     local scriptFrame = scriptsTab:FindFirstChild(name)
                     button = scriptFrame and scriptFrame:FindFirstChild(name .. "Button")
                 end
@@ -2218,13 +2276,13 @@ local function safeExecute(func, name, state)
 end
 
 
---// ====================================[   V3.1 ECLIPSE UI CREATION    ]==================================== //--
+--// ====================================[   V3.1 PHANTOM UI CREATION    ]==================================== //--
 function createMainUI()
     local currentGui = getPlayerGui()
     if not currentGui then return end
     
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "EclipseHub"
+    ScreenGui.Name = "PhantomHub"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     
@@ -2803,10 +2861,10 @@ local p=game.Players.LocalPlayer; RS.Stepped:Connect(function() if p.Character t
             elseif prompt:match("fly") then generateScript("fly")
             elseif prompt:match("noclip") or prompt:match("through") then generateScript("noclip")
             elseif prompt:match("god") or prompt:match("invincible") then generateScript("god")
-            elseif prompt:match("hello") or prompt:match("hi") or prompt:match("hey") then addMessageToChat("AI", "Hello!\nI'm the Eclipse AI. Ask me anything – from script requests to toggling features like 'enable fly' or even 'explain aimbot'.")
+            elseif prompt:match("hello") or prompt:match("hi") or prompt:match("hey") then addMessageToChat("AI", "Hello!\nI'm the Phantom AI. Ask me anything – from script requests to toggling features like 'enable fly' or even 'explain aimbot'.")
             elseif prompt:match("help") or prompt:match("what") then addMessageToChat("AI", "I can toggle scripts (e.g., 'turn on noclip'), generate code (e.g., 'make a fly script'), or explain scripts ('explain server hop'). What can I do for you?")
             elseif prompt:match("server hop") or prompt:match("new server") then addMessageToChat("AI", "To server hop, go to the Scripts tab and execute 'Server Hop'. It automatically finds and \nteleports you to a low-player server.")
-            elseif prompt:match("theme") then addMessageToChat("AI", "You can change themes in Settings > Visual Theme. I personally recommend the new 'Eclipse' theme for a sleek look.")
+            elseif prompt:match("theme") then addMessageToChat("AI", "You can change themes in Settings > Visual Theme. I personally recommend the new 'Phantom' theme for a sleek look.")
             else
                 if math.random() > 0.5 then addMessageToChat("AI", "That's an interesting query. If you meant a script, try phrasing it like 'generate a rainbow character script'. Otherwise, tell me more.")
             else addMessageToChat("AI", lang.ai_unknown_command) end
@@ -2922,7 +2980,7 @@ local p=game.Players.LocalPlayer; RS.Stepped:Connect(function() if p.Character t
         ThemeGrid.Parent = ThemeSection
         local ThemeLayout = Instance.new("UIGridLayout"); ThemeLayout.CellSize = UDim2.new(0, 100, 0, 30);
         ThemeLayout.CellPadding = UDim2.new(0, 8, 0, 8); ThemeLayout.Parent = ThemeGrid
-        local themeOrder = {"Eclipse", "Nexus", "QuantumCore", "NeuralNet", "Glassmorphism", "CyberNeon", "Sunset", "Ocean", "Forest", "Pastel", "Monochrome", "Galaxy", "Fire", "Ice", "Retro", "Matrix"}
+        local themeOrder = {"Phantom", "Nexus", "QuantumCore", "NeuralNet", "Glassmorphism", "CyberNeon", "Sunset", "Ocean", "Forest", "Pastel", "Monochrome", "Galaxy", "Fire", "Ice", "Retro", "Matrix"}
         for _, themeName in ipairs(themeOrder) do
             local themeData = Themes[themeName]
             local ThemeButton = Instance.new("TextButton");
@@ -3064,7 +3122,7 @@ local p=game.Players.LocalPlayer; RS.Stepped:Connect(function() if p.Character t
         local InfoPadding = Instance.new("UIPadding");
         InfoPadding.PaddingTop=UDim.new(0,30); InfoPadding.PaddingLeft=UDim.new(0,30); InfoPadding.PaddingRight=UDim.new(0,30); InfoPadding.PaddingBottom=UDim.new(0,30); InfoPadding.Parent=InfoContainer
         local InfoTitle = Instance.new("TextLabel");
-        InfoTitle.Size = UDim2.new(1, 0, 0, 40); InfoTitle.BackgroundTransparency = 1; InfoTitle.Text = "🌌 0_0 Hub Eclipse"; InfoTitle.Font = Enum.Font.GothamBold;
+        InfoTitle.Size = UDim2.new(1, 0, 0, 40); InfoTitle.BackgroundTransparency = 1; InfoTitle.Text = "🌌 0_0 Hub Phantom"; InfoTitle.Font = Enum.Font.GothamBold;
         InfoTitle.TextSize = 28; InfoTitle.TextColor3 = Color3.fromRGB(255, 255, 255); InfoTitle.TextXAlignment = Enum.TextXAlignment.Center;
         InfoTitle.Parent = InfoContainer
         table.insert(ThemedElements, {Element = InfoTitle, Properties = { TextColor3 = "Text" }})
@@ -3098,7 +3156,7 @@ local p=game.Players.LocalPlayer; RS.Stepped:Connect(function() if p.Character t
     switchTab("Dashboard")
     return ScreenGui, internalToggleFunction
 end
---// ====================================[ V3.1 ECLIPSE LOADING SCREEN ]==================================== //--
+--// ====================================[ V3.1 PHANTOM LOADING SCREEN ]==================================== //--
 local function createLoadingScreen()
     local finished = Instance.new("BindableEvent")
     local LoadingGui = Instance.new("ScreenGui");
@@ -3115,6 +3173,7 @@ local function createLoadingScreen()
     
     local background = Instance.new("Frame");
     background.Size = UDim2.new(1,0,1,0); background.BackgroundColor3 = Color3.fromRGB(0,0,0); background.Parent = LoadingGui
+    local accentStrip = Instance.new("Frame"); accentStrip.Size = UDim2.new(1,0,0,4); accentStrip.BackgroundColor3 = Color3.fromRGB(0,153,255); accentStrip.BorderSizePixel = 0; accentStrip.Parent = background
     
     -- *** IMPROVEMENT: Using Size/Position 0.6/0.5/0.5 for consistent centering on any screen size. ***
     local imageFrame = Instance.new("Frame");
@@ -3124,12 +3183,12 @@ local function createLoadingScreen()
     imageFrame.BackgroundTransparency = 1;
     imageFrame.Parent = background
     
-    local carImage = Instance.new("ImageLabel"); carImage.Image = "rbxassetid://18544062035";
+    local carImage = Instance.new("ImageLabel"); carImage.Image = "rbxassetid://81150350439873";
     carImage.Size = UDim2.new(1,0,1,0); carImage.BackgroundTransparency = 1;
     carImage.ImageTransparency = 0.5; carImage.ScaleType = Enum.ScaleType.Fit;
     carImage.Parent = imageFrame
     
-    local title = Instance.new("TextLabel"); title.Text = "0_0 hub";
+    local title = Instance.new("TextLabel"); title.Text = "0_0 Hub | Phantom Update";
     title.Font = Enum.Font.GothamBold; title.TextSize = 50;
     title.TextColor3 = Color3.new(1,1,1); title.Size = UDim2.new(1, 0, 0, 60);
     title.Position = UDim2.new(0, 0, 0, 20); title.BackgroundTransparency = 1;
@@ -3150,7 +3209,7 @@ local function createLoadingScreen()
     Instance.new("UICorner", progressBarBack).CornerRadius = UDim.new(1,0)
     
     local progressBarFill = Instance.new("Frame");
-    progressBarFill.Size = UDim2.new(0, 0, 1, 0); progressBarFill.BackgroundColor3 = Themes.Eclipse.Accent; progressBarFill.BorderSizePixel = 0;
+    progressBarFill.Size = UDim2.new(0, 0, 1, 0); progressBarFill.BackgroundColor3 = Themes.Phantom.Accent; progressBarFill.BorderSizePixel = 0;
     progressBarFill.Parent = progressBarBack
     Instance.new("UICorner", progressBarFill).CornerRadius = UDim.new(1,0)
     
@@ -3169,7 +3228,7 @@ local function createLoadingScreen()
         end
     end)
     spawn(function()
-        local statuses = {"Booting Eclipse core...", "Initializing v3.1 modules...", "Loading Left-Sidebar UI...", "Compiling user profiles...", "Applying enhancements...", "Launching UI..."}
+        local statuses = {"Booting Phantom core...", "Initializing v3.2 modules...", "Loading Left-Sidebar UI...", "Compiling user profiles...", "Applying enhancements...", "Launching UI..."}
         safeTween(carImage, TweenInfo.new(1), {ImageTransparency = 0})
         for i, status in ipairs(statuses) do
             statusLabel.Text = "> " .. status
@@ -3199,7 +3258,7 @@ local function createLoginUI()
     LoginFrame.Parent = LoginGui
     Instance.new("UICorner", LoginFrame).CornerRadius = UDim.new(0, 20) -- More Rounded
     local LoginGradient = Instance.new("UIGradient");
-    LoginGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Themes.Eclipse.Accent), ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 25))}; LoginGradient.Parent = LoginFrame -- Eclipse Accent
+    LoginGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Themes.Phantom.Accent), ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 25))}; LoginGradient.Parent = LoginFrame -- Phantom Accent
     local LoginTitle = Instance.new("TextLabel");
     LoginTitle.Size = UDim2.new(1, 0, 0, 60); LoginTitle.Position = UDim2.new(0, 0, 0, 20); LoginTitle.BackgroundTransparency = 1;
     LoginTitle.Text = Languages[HubState.CurrentLanguage].login_title or "🔐 Secure Login"; LoginTitle.Font = Enum.Font.GothamBold; LoginTitle.TextSize = 24; LoginTitle.TextColor3 = Color3.fromRGB(255, 255, 255);
@@ -3228,7 +3287,7 @@ local function createLoginUI()
     -- Centered Login Button
     local LoginButton = Instance.new("TextButton");
     LoginButton.Size = UDim2.new(0.6, 0, 0, 45);
-    LoginButton.Position = UDim2.new(0.5, 0, 0, 230); LoginButton.AnchorPoint = Vector2.new(0.5, 0); LoginButton.BackgroundColor3 = Themes.Eclipse.Accent;
+    LoginButton.Position = UDim2.new(0.5, 0, 0, 230); LoginButton.AnchorPoint = Vector2.new(0.5, 0); LoginButton.BackgroundColor3 = Themes.Phantom.Accent;
     LoginButton.BackgroundTransparency = 0.1;
     LoginButton.BorderSizePixel = 0;
     LoginButton.Text = Languages[HubState.CurrentLanguage].login_button or "Access Hub"; LoginButton.Font = Enum.Font.GothamBold; LoginButton.TextSize = 18;
@@ -3255,7 +3314,7 @@ local function createLoginUI()
             hubGui.Parent = currentGui
             local mainContainer = hubGui:FindFirstChild("MainContainer")
             if mainContainer then mainContainer.Position = UDim2.new(0.5, 0, 0.5, 0); mainContainer.AnchorPoint = Vector2.new(0.5, 0.5); HubState.Visible = true end
-            showNotification("Welcome to 0_0 Hub Eclipse!", "success")
+            showNotification("Welcome to 0_0 Hub Phantom!", "success")
         else
             StatusLabel.Text = Languages[HubState.CurrentLanguage].login_failed or "Invalid credentials. Please try again.";
             StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
@@ -3361,14 +3420,14 @@ local function initializeHub()
     local currentGui = getPlayerGui()
     if not currentGui then warn("Cannot initialize Hub: PlayerGui is unavailable."); return end
 
-    if currentGui:FindFirstChild("EclipseHub") or currentGui:FindFirstChild("HubLogin") or currentGui:FindFirstChild("HubLoadingScreen") then showNotification("Hub is already running!", "info"); return end
+    if currentGui:FindFirstChild("PhantomHub") or currentGui:FindFirstChild("HubLogin") or currentGui:FindFirstChild("HubLoadingScreen") then showNotification("Hub is already running!", "info"); return end
     
     -- Re-initialize notifications with the confirmed currentGui pointer
     pcall(initializeNotifications)
     
     local loadingFinished = createLoadingScreen()
     loadingFinished:Connect(createLoginUI)
-    showNotification("Welcome to 0_0 Hub Eclipse! Press " .. HubState.Hotkeys.ToggleHub.Name .. " to toggle.", "success")
+    showNotification("Welcome to 0_0 Hub Phantom! Press " .. HubState.Hotkeys.ToggleHub.Name .. " to toggle.", "success")
 end
 
 -- CRITICAL FIX: The entire initialization is protected, and services are only grabbed deep inside the functions.
@@ -3378,11 +3437,11 @@ spawn(function()
 end) 
 spawn(function() while safeWait(60) do pcall(collectgarbage) end end)
 print("=====================================================================")
-print("🚀 0_0 Hub V3.1.6 - ECLIPSE (Absolute Final Shield) Loaded Successfully!")
+print("🚀 0_0 Hub V3.2 - PHANTOM (Absolute Final Shield) Loaded Successfully!")
 print("✨ CRITICAL FIX: Button updates are now shielded to bypass CoreGui conflicts.")
 print("⭐ All elements are centered and rounded to a modern aesthetic.")
 print("🎮 Press " .. HubState.Hotkeys.ToggleHub.Name .. " to open the hub")
 print("🔧 Emergency hide: " .. HubState.Hotkeys.EmergencyHide.Name .. " | Quick Execute: " .. HubState.Hotkeys.QuickExecute.Name)
-print("💎 Enjoy the ECLIPSE update!")
+print("💎 Enjoy the PHANTOM update!")
 print("🔍 Compatible with:", currentExecutor, "executor")
 print("=====================================================================")
