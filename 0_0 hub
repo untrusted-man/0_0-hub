@@ -1598,7 +1598,6 @@ local ScriptLibrary = {
             end
         end
     },
-    {
         
        {
     name = "server_hop",
@@ -1658,7 +1657,6 @@ local ScriptLibrary = {
         return true
     end
     },
-    {
         
        {
     name = "avatar_previewer",
